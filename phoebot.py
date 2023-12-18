@@ -62,7 +62,6 @@ async def date(ctx: Context):
 @bot.command()
 async def heh(ctx: Context):
     josie = bot.guild.get_member(559828298973184011)
-    print(josie.status)
     await josie.send("Boop <a:mmaPokeAnnoyLove:764772302680227890>")
 
 

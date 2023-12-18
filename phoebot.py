@@ -18,4 +18,4 @@ async def on_message(message):
        await message.channel.send("Hello!")
        
 
-client.run(os.environ["BOT_TOKEN"])
+client.run(os.getenv("BOT_TOKEN"))

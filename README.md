@@ -1,3 +1,4 @@
+[![Build Status](https://starling-legal-snapper.ngrok-free.app/buildStatus/icon?job=PhoeBot)](https://starling-legal-snapper.ngrok-free.app/job/PhoeBot/)
 # PhoeBot
 ## Time to learn how to use Docker, Jenkins, and discord.py!
 A Discord bot that will make my life easier.

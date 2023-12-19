@@ -11,6 +11,7 @@ class Loops(commands.Cog):
         self.bedtime.start()
         self.morning.start()
         self.drinkWater.start()
+        self.apod.start()
 
     @tasks.loop(minutes=15)
     async def sleepyTime(self):

@@ -16,7 +16,7 @@ bot = PhoeBot(command_prefix="!", intents=discord.Intents.all(), activity=discor
 async def on_ready():
     print("We have logged in as {0.user}".format(bot))
     for cog in cogs:
-        await bot.load_extension(cog)
+        await bot.load_extension("cogs." + cog)
 
 
 bot.run(os.getenv("BOT_TOKEN"))

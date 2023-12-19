@@ -12,7 +12,8 @@ class TextCommands(commands.Cog):
 
     @commands.command()
     async def heh(self, ctx: commands.Context):
-        await self.bot.josie.send("Boop <a:mmaPokeAnnoyLove:764772302680227890>")
+        josie = self.bot.get_user(559828298973184011)
+        await josie.send("Boop <a:mmaPokeAnnoyLove:764772302680227890>")
 
     @commands.command()
     async def catfact(self, ctx: commands.Context):

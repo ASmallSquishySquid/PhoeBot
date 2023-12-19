@@ -14,13 +14,17 @@ class Loops(commands.Cog):
 
     @tasks.loop(minutes=15)
     async def sleepyTime(self):
-        if (self.bot.phoebe.status==discord.Status.online):
-            await self.bot.phoebe.send("Go to sleep! <:charmanderawr:837344550804127774>")
+        guild = self.bot.get_guild(712909571622043728)
+        phoebe = guild.get_member(274397067177361408)
+        if (phoebe.status==discord.Status.online):
+            await phoebe.send("Go to sleep! <:charmanderawr:837344550804127774>")
 
     @tasks.loop(minutes=30)
     async def drinkWater(self):
-        if (self.bot.phoebe.status==discord.Status.online):
-            await self.bot.phoebe.send("Drink some water! <:charmanderawr:837344550804127774>")
+        guild = self.bot.get_guild(712909571622043728)
+        phoebe = guild.get_member(274397067177361408)
+        if (phoebe.status==discord.Status.online):
+            await phoebe.send("Drink some water! <:charmanderawr:837344550804127774>")
 
     # 11:30 PM
     @tasks.loop(time=datetime.time(hour=7, minute=30))
@@ -47,7 +51,8 @@ class Loops(commands.Cog):
                         embedMessage.set_image(url=js["url"])
                     elif js["media_type"] == "video":
                         embedMessage.set_image(url=js["thumbnail_url"])
-                    await self.bot.phoebe.send(embed=embedMessage)
+                    phoebe = self.bot.get_user(274397067177361408)
+                    await phoebe.send(embed=embedMessage)
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(Loops(bot))

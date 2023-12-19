@@ -8,20 +8,15 @@ cogs = ["textcommands", "loops"]
 class PhoeBot(Bot):
     def __init__(self, command_prefix, intents: discord.Intents, activity):
         super().__init__(command_prefix=command_prefix, intents=intents, activity=activity)
-
-    async def setup_hook(self):
-        for cog in cogs:
-            await self.load_extension(cog)
     
        
 bot = PhoeBot(command_prefix="!", intents=discord.Intents.all(), activity=discord.Activity(type=discord.ActivityType.watching, name="you 👀"))
 
 @bot.event
 async def on_ready():
-    bot.guild = bot.get_guild(712909571622043728)
-    bot.phoebe = bot.guild.get_member(274397067177361408)
-    bot.josie = bot.guild.get_member(559828298973184011)
     print("We have logged in as {0.user}".format(bot))
+    for cog in cogs:
+        await bot.load_extension(cog)
 
 @bot.event
 async def on_message(message):

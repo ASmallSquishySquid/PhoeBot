@@ -3,7 +3,7 @@ import os
 
 from discord.ext.commands import Bot
 
-cogs = ["textcommands", "loops"]
+cogs = ["textcommands", "loops", "events"]
 
 class PhoeBot(Bot):
     def __init__(self, command_prefix, intents: discord.Intents, activity):
@@ -18,14 +18,5 @@ async def on_ready():
     for cog in cogs:
         await bot.load_extension(cog)
 
-@bot.event
-async def on_message(message):
-    if message.author == bot.user:
-        return
-    
-    if message.content.lower().startswith("hi") or message.content.lower().startswith("hello") :
-        await message.reply("Hello! <:charmanderawr:837344550804127774>", mention_author=True)
-
-    await bot.process_commands(message)
 
 bot.run(os.getenv("BOT_TOKEN"))

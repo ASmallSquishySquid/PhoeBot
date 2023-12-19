@@ -8,6 +8,9 @@ from discord.ext import tasks
 class Loops(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
+        self.bedtime.start()
+        self.morning.start()
+        self.drinkWater.start()
 
     @tasks.loop(minutes=15)
     async def sleepyTime(self):

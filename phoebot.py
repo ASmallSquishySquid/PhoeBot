@@ -18,9 +18,6 @@ bot = PhoeBot(command_prefix="!", intents=discord.Intents.all(), activity=discor
 
 @bot.event
 async def on_ready():
-    bot.bedtime.start()
-    bot.morning.start()
-    bot.drinkWater.start()
     bot.guild = bot.get_guild(712909571622043728)
     bot.phoebe = bot.guild.get_member(274397067177361408)
     bot.josie = bot.guild.get_member(559828298973184011)

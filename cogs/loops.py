@@ -10,8 +10,12 @@ class Loops(commands.Cog):
         self.bot = bot
         self.bedtime.start()
         self.morning.start()
-        self.drinkWater.start()
         self.apod.start()
+        
+        if not (datetime.datetime.now() > datetime.time(hour=9) and datetime.datetime.now() < datetime.time(hour=23, minute=30)):
+            self.sleepyTime.start()
+        else:
+            self.drinkWater.start()
 
     @tasks.loop(minutes=15)
     async def sleepyTime(self):

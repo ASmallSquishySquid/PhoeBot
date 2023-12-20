@@ -1,5 +1,7 @@
-import datetime
 import aiohttp
+import datetime
+import discord
+
 from discord.ext import commands
 
 class TextCommands(commands.Cog):
@@ -23,6 +25,19 @@ class TextCommands(commands.Cog):
                 if response.status == 200:
                     js = await response.json()
                     await ctx.send(js["data"][0] + " <:lick:764398697596715014>")
+
+    @commands.command()
+    async def np(self, ctx: commands.Context):
+        # Only works when sent in a server
+        if isinstance(ctx.author, discord.Member):
+            for activity in ctx.author.activities:
+                if isinstance(activity, discord.Spotify):
+                    await ctx.send("https://open.spotify.com/track/" + activity.track_id)
+                    return
+            await ctx.send("You are not currently listening to anything on Spotify <:charmanderawr:837344550804127774>")
+        else:
+            await ctx.send("Can not get user's Spotify status in DMs <:judgemental:748787284811186216>")
+
     
 async def setup(bot: commands.Bot):
     await bot.add_cog(TextCommands(bot))

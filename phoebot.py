@@ -3,7 +3,7 @@ import os
 
 from discord.ext.commands import Bot
 
-cogs = ["textcommands", "loops", "events"]
+cogs = ["textcommands", "loops", "events", "reminders"]
 
 class PhoeBot(Bot):
     def __init__(self, command_prefix, intents: discord.Intents, activity):

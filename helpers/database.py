@@ -5,7 +5,7 @@ class Database():
     connection = None
 
     def select(query):
-        if Database.connection == None:
+        if Database.connection is None:
             Database.connect()
 
         cursor = Database.connection.cursor()
@@ -18,7 +18,7 @@ class Database():
         return results
 
     def insert(query):
-        if Database.connection == None:
+        if Database.connection is None:
             Database.connect()
 
         cursor = Database.connection.cursor()

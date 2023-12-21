@@ -25,7 +25,10 @@ class Events(commands.Cog):
         
         oldPlaying = [game.name for game in before.activities if str(game.type) == "ActivityType.playing"]
         newPlaying = [game.name for game in after.activities if str(game.type) == "ActivityType.playing" and game.name not in oldPlaying]
+        
         channel = self.bot.get_channel(874822355334094858)
+        if channel is None:
+            channel = await self.bot.fetch_channel(874822355334094858)
 
         if "Overwatch 2" in newPlaying:
             await channel.send("<@559828298973184011> want to do some watching over?")

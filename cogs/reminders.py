@@ -30,6 +30,9 @@ class Reminders(commands.Cog):
             for reminder in self.reminders:
                 if reminder[3] < (datetime.datetime.now() + datetime.timedelta(minutes=1)):
                     requester = self.bot.get_user(reminder[1])
+                    if requester is None:
+                        requester = await self.bot.fetch_user(reminder[1])
+
                     embedMessage = discord.Embed(title="Reminder! <:charmanderawr:837344550804127774>", description=reminder[2], color=discord.Color.og_blurple())
                     embedMessage.add_field(name="Time", value=reminder[3].strftime("%m/%d/%Y, %H:%M"))
                     buttons = SnoozeButtons(self, reminder[2])

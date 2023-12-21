@@ -42,7 +42,11 @@ class TextCommands(commands.Cog):
 
     @commands.command()
     async def authorize(self, ctx: commands.Context, user: discord.User):
-        AuthorizedUsers.addUser(user.id, user.global_name)
+        name = user.global_name
+        if name is None:
+            name = user.name
+        AuthorizedUsers.addUser(user.id, name)
+        await ctx.send("User " + name + " is no longer a stranger <:charmanderawr:837344550804127774>")
 
     
 async def setup(bot: commands.Bot):

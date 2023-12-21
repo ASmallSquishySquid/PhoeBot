@@ -23,11 +23,13 @@ class AuthorizedUsers():
         return AuthorizedUsers.users
 
     def addUser(userId, username):
-        AuthorizedUsers.users.add(userId)
+        if userId in AuthorizedUsers.users:
+            return
 
+        AuthorizedUsers.users.add(userId)
         AuthorizedUsers.numAdded += 1
 
-        insert = """INSERT INTO users VALUES ({}, "{}");""".format(userId, username)
+        insert = """INSERT OR IGNORE INTO users VALUES ({}, "{}");""".format(userId, username)
 
         if (AuthorizedUsers.connection == None):
             package_dir = os.path.abspath(os.path.dirname(__file__))

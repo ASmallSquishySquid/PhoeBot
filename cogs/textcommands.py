@@ -4,6 +4,8 @@ import discord
 
 from discord.ext import commands
 
+from helpers.authorizedusers import AuthorizedUsers
+
 class TextCommands(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
@@ -37,6 +39,10 @@ class TextCommands(commands.Cog):
             await ctx.send("You are not currently listening to anything on Spotify <:charmanderawr:837344550804127774>")
         else:
             await ctx.send("Can not get user's Spotify status in DMs <:judgemental:748787284811186216>")
+
+    @commands.command()
+    async def authorize(self, ctx: commands.Context, user: discord.User):
+        AuthorizedUsers.addUser(user.id, user.global_name)
 
     
 async def setup(bot: commands.Bot):

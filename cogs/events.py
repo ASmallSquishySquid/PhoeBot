@@ -1,5 +1,7 @@
 from discord.ext import commands
 
+from helpers.authorizedusers import AuthorizedUsers
+
 class Events(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
@@ -9,7 +11,10 @@ class Events(commands.Cog):
         if message.author == self.bot.user:
             return
         
-        if message.content.lower().startswith("hi") or message.content.lower().startswith("hello") :
+        if not message.author.id in AuthorizedUsers.getUserSet():
+            await message.reply("Sorry, I don't talk to strangers <:mmSweatUhhMocha:764772302403272704>")
+
+        elif message.content.lower().startswith("hi") or message.content.lower().startswith("hello") :
             await message.reply("Hello! <:charmanderawr:837344550804127774>", mention_author=True)
 
     @commands.Cog.listener()

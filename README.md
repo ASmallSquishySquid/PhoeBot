@@ -1,7 +1,9 @@
 [![If you're reading this, Jenkins is currently offline](https://starling-legal-snapper.ngrok-free.app/buildStatus/icon?job=PhoeBot)](https://starling-legal-snapper.ngrok-free.app/job/PhoeBot/)
 # PhoeBot
 ## Time to learn how to use Docker, Jenkins, and discord.py!
-A Discord bot that will make my life easier.
+A Discord bot that will make my life easier. It doesn't like to talk to strangers though
+
+![image](https://github.com/ASmallSquishySquid/PhoeBot/assets/78177277/4277316d-115d-4b84-b5d5-6e5e49266a65)
 
 * Running on a Raspberry Pi Zero W.
 * CI/CD with Jenkins, ngrok, Docker, and Bash scripts.

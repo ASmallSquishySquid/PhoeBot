@@ -1,11 +1,11 @@
 import asyncio
 import datetime
 import discord
-import os
-import sqlite3
 
 from discord.ext import commands
 from discord.ext import tasks
+
+from helpers.database import Database
 
 class Reminders(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -17,17 +17,8 @@ class Reminders(commands.Cog):
     # every day, on startup time
     @tasks.loop(hours=24)
     async def getReminders(self):
-        package_dir = os.path.abspath(os.path.dirname(__file__))
-        database_path = os.path.join(package_dir, "..", "..", "phoebot.db")
-        connection = sqlite3.connect(database_path, detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
-        cursor = connection.cursor()
-        cursor.execute("""SELECT * FROM reminders WHERE date >= datetime("now", "localtime") AND date < datetime("now", "localtime", "1 day");""")
-
         async with self.lock:
-            self.reminders = cursor.fetchall()
-
-        cursor.close()
-        connection.close()
+            self.reminders = Database.select("""SELECT * FROM reminders WHERE date >= datetime("now", "localtime") AND date < datetime("now", "localtime", "1 day");""")
 
         if not self.sendReminders.is_running():
             self.sendReminders.start()
@@ -48,11 +39,6 @@ class Reminders(commands.Cog):
 
     @commands.command()
     async def remind(self, ctx: commands.Context, reminder, *, args):
-        package_dir = os.path.abspath(os.path.dirname(__file__))
-        database_path = os.path.join(package_dir, "..", "..", "phoebot.db")
-        connection = sqlite3.connect(database_path, detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
-        cursor = connection.cursor()
-
         timeArg = "".join(args)
         dateParam = datetime.datetime.now()
 
@@ -78,13 +64,7 @@ class Reminders(commands.Cog):
             elif lowerComponent.endswith("s"):
                 dateParam = dateParam + datetime.timedelta(seconds=int(lowerComponent[:-1]))
 
-        insert = """INSERT INTO reminders(userId, reminder, date) VALUES ({}, "{}", "{}");""".format(ctx.author.id, reminder, dateParam)
-
-        cursor.execute(insert)
-        connection.commit()
-
-        cursor.close()
-        connection.close()
+        Database.insert("""INSERT INTO reminders(userId, reminder, date) VALUES ({}, "{}", "{}");""".format(ctx.author.id, reminder, dateParam))
 
         if dateParam < (datetime.datetime.now() + datetime.timedelta(days=1)):
             self.reminders.append((0, ctx.author.id, reminder, dateParam))

@@ -32,7 +32,8 @@ class Reminders(commands.Cog):
                     requester = self.bot.get_user(reminder[1])
                     embedMessage = discord.Embed(title="Reminder! <:charmanderawr:837344550804127774>", description=reminder[2], color=discord.Color.og_blurple())
                     embedMessage.add_field(name="Time", value=reminder[3].strftime("%m/%d/%Y, %H:%M"))
-                    await requester.send(embed=embedMessage, view=SnoozeButtons(self, reminder[2]))
+                    buttons = SnoozeButtons(self, reminder[2])
+                    buttons.message = await requester.send(embed=embedMessage, view=buttons)
                 else:
                     later.append(reminder)
             self.reminders = later
@@ -89,6 +90,8 @@ class SnoozeButtons(discord.ui.View):
     async def on_timeout(self):
         for child in self.children:
             child.disabled = True
+
+        await self.message.edit(view=self)
 
     @discord.ui.button(label="15 minutes", style=discord.ButtonStyle.primary, emoji="<a:mochaSleep:764675744819314738>")
     async def delay_15_button(self, interaction: discord.Interaction, button: discord.ui.Button):

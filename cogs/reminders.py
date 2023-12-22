@@ -54,6 +54,10 @@ class Reminders(commands.Cog):
                 dateParam = dateParam.replace(hour=int(parts[0]), minute=int(parts[1]))
                 if (len(parts) == 3):
                     dateParam = dateParam.replace(second=int(parts[2]))
+
+                # Check if the time was meant for tomorrow
+                if dateParam < datetime.datetime.now() and len(components) == 1:
+                    dateParam = dateParam + datetime.timedelta(days=1)
             elif "/" in lowerComponent:
                 parts = lowerComponent.split("/")
                 dateParam = dateParam.replace(month=int(parts[0]), day=int(parts[1]))

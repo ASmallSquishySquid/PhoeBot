@@ -10,7 +10,7 @@ from helpers.database import Database
 class Reminders(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.reminders = []
+        self.reminderList = []
         self.lock = asyncio.Lock()
         self.getReminders.start()
 
@@ -18,7 +18,7 @@ class Reminders(commands.Cog):
     @tasks.loop(hours=24)
     async def getReminders(self):
         async with self.lock:
-            self.reminders = Database.select("""SELECT * FROM reminders WHERE date >= datetime("now", "localtime") AND date < datetime("now", "localtime", "1 day");""")
+            self.reminderList = Database.select("""SELECT * FROM reminders WHERE date >= datetime("now", "localtime") AND date < datetime("now", "localtime", "1 day");""")
 
         if not self.sendReminders.is_running():
             self.sendReminders.start()
@@ -27,7 +27,7 @@ class Reminders(commands.Cog):
     async def sendReminders(self):
         later = []
         async with self.lock:
-            for reminder in self.reminders:
+            for reminder in self.reminderList:
                 if reminder[3] < (datetime.datetime.now() + datetime.timedelta(minutes=1)):
                     requester = self.bot.get_user(reminder[1])
                     if requester is None:
@@ -39,7 +39,7 @@ class Reminders(commands.Cog):
                     buttons.message = await requester.send(embed=embedMessage, view=buttons)
                 else:
                     later.append(reminder)
-            self.reminders = later
+            self.reminderList = later
 
     @commands.command(
         help="Set a reminder"
@@ -80,7 +80,8 @@ class Reminders(commands.Cog):
         Database.insert("""INSERT INTO reminders(userId, reminder, date) VALUES ({}, "{}", "{}");""".format(ctx.author.id, reminder, dateParam))
 
         if dateParam < (datetime.datetime.now() + datetime.timedelta(days=1)):
-            self.reminders.append((0, ctx.author.id, reminder, dateParam))
+            async with self.lock:
+                self.reminderList.append((0, ctx.author.id, reminder, dateParam))
 
         embedMessage = discord.Embed(title="Reminder created <:charmanderawr:837344550804127774>", description=reminder, color=discord.Color.og_blurple())
         embedMessage.add_field(name="Scheduled Time", value=dateParam.strftime("%m/%d/%Y at %H:%M"))
@@ -154,7 +155,7 @@ class SnoozeButtons(discord.ui.View):
         Database.insert("""INSERT INTO reminders(userId, reminder, date) VALUES ({}, "{}", "{}");""".format(interaction.user.id, self.reminder, dateParam))
 
         if dateParam < (datetime.datetime.now() + datetime.timedelta(days=1)):
-            self.reminderInstance.reminders.append((0, interaction.user, self.reminder, dateParam))
+            self.reminderInstance.reminderList.append((0, interaction.user.id, self.reminder, dateParam))
 
         await interaction.response.edit_message(view=self)
 

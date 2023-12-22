@@ -50,6 +50,10 @@ class TextCommands(commands.Cog):
         AuthorizedUsers.addUser(user.id, name)
         await ctx.send("User " + name + " is no longer a stranger <:charmanderawr:837344550804127774>")
 
+    @commands.command()
+    async def sauce(self, ctx: commands.Context):
+        await ctx.send("https://github.com/ASmallSquishySquid/PhoeBot")
+
     
 async def setup(bot: commands.Bot):
     await bot.add_cog(TextCommands(bot))

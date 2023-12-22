@@ -41,8 +41,13 @@ class Reminders(commands.Cog):
                     later.append(reminder)
             self.reminders = later
 
-    @commands.command()
-    async def remind(self, ctx: commands.Context, reminder: str, *, args):
+    @commands.command(
+        help="Set a reminder"
+    )
+    async def remind(self, ctx: commands.Context, 
+        reminder: str = commands.parameter(description="What do you want to be reminded of?"), *, 
+        args: str = commands.parameter(displayed_name="time", description="When do you want to be reminded?", default="1h")
+    ):
         timeArg = "".join(args)
         dateParam = datetime.datetime.now()
 
@@ -88,8 +93,10 @@ class Reminders(commands.Cog):
         else:
             await ctx.send('Please keep the reminder in one string and keep all time components separate. And no AM/PM! <:charmanderawr:837344550804127774>')
 
-    @commands.command()
-    async def reminders(self, ctx: commands.Context, count=10):
+    @commands.command(
+        help="Get your future reminders"
+    )
+    async def reminders(self, ctx: commands.Context, count: int = commands.parameter(default=10, description="Number of reminders per page")):
         total = Database.count("reminders", """WHERE userId = {} AND date > "{}" """.format(ctx.author.id, datetime.datetime.now()))
 
         if total == 0:

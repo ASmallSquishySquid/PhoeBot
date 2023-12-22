@@ -4,7 +4,7 @@ class AuthorizedUsers():
     users = set()
     numAdded = 0
 
-    def getUserSet():
+    def getUserSet() -> set:
         # Pull from the database if we haven't yet
         if (len(AuthorizedUsers.users) == AuthorizedUsers.numAdded):
             userIds = Database.select("SELECT id FROM users;")
@@ -13,7 +13,7 @@ class AuthorizedUsers():
 
         return AuthorizedUsers.users
 
-    def addUser(userId, username):
+    def addUser(userId: int, username: str) -> None:
         if userId in AuthorizedUsers.users:
             return
 

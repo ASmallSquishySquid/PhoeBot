@@ -42,7 +42,7 @@ class Reminders(commands.Cog):
             self.reminders = later
 
     @commands.command()
-    async def remind(self, ctx: commands.Context, reminder, *, args):
+    async def remind(self, ctx: commands.Context, reminder: str, *, args):
         timeArg = "".join(args)
         dateParam = datetime.datetime.now()
 
@@ -115,7 +115,7 @@ class Reminders(commands.Cog):
         buttons.message = await ctx.send(embed=embedMessage, view=buttons)
 
 class SnoozeButtons(discord.ui.View):
-    def __init__(self, reminderInstance, reminder):
+    def __init__(self, reminderInstance: Reminders, reminder: str):
         super().__init__(timeout=120)
         self.reminderInstance = reminderInstance
         self.reminder = reminder
@@ -156,7 +156,7 @@ class SnoozeButtons(discord.ui.View):
         await interaction.user.send(embed=embedMessage)
 
 class PageButtons(discord.ui.View):
-    def __init__(self, total, count, id, pages, embed: discord.Embed):
+    def __init__(self, total: int, count: int, id: int, pages: dict, embed: discord.Embed):
         super().__init__(timeout=60)
         self.userId = id
         self.total = total

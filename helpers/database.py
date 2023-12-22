@@ -4,7 +4,7 @@ import sqlite3
 class Database():
     connection = None
 
-    def select(query):
+    def select(query: str) -> list:
         if Database.connection is None:
             Database.connect()
 
@@ -17,7 +17,7 @@ class Database():
 
         return results
 
-    def insert(query):
+    def insert(query: str) -> None:
         if Database.connection is None:
             Database.connect()
 
@@ -26,7 +26,7 @@ class Database():
         cursor.close()
         Database.connection.commit()
 
-    def count(table, filters):
+    def count(table: str, filters: str) -> int:
         if Database.connection is None:
             Database.connect()
 
@@ -39,7 +39,7 @@ class Database():
 
         return count
 
-    def connect():
+    def connect() -> None:
         package_dir = os.path.abspath(os.path.dirname(__file__))
         database_path = os.path.join(package_dir, "..", "..", "phoebot.db")
         Database.connection = sqlite3.connect(database_path, detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)

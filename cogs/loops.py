@@ -46,14 +46,14 @@ class Loops(commands.Cog):
     # 11:30 PM
     @tasks.loop(time=datetime.time(hour=7, minute=30))
     async def bedtime(self):
-        await self.sleepyTime.start()
-        await self.drinkWater.cancel()
+        self.sleepyTime.start()
+        self.drinkWater.cancel()
 
     # 9:00 AM
     @tasks.loop(time=datetime.time(hour=17, minute=0))
     async def morning(self):
-        await self.sleepyTime.cancel()
-        await self.drinkWater.start()
+        self.sleepyTime.cancel()
+        self.drinkWater.start()
 
     # 8:30 AM
     @tasks.loop(time=datetime.time(hour=16, minute=30))

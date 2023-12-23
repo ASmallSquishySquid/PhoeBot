@@ -5,7 +5,7 @@ import datetime
 
 from discord.ext.commands import Bot
 
-sys.stdout = open("../phoebot-{}.log".format(datetime.datetime.now().strftime("%m:%d:%Y-%H:%M")), 'w')
+sys.stdout = open("../phoebot_logs/{}.log".format(datetime.datetime.now().strftime("%m:%d:%Y-%H:%M")), 'w')
 sys.stderr = sys.stdout
 
 cogs = ["textcommands", "loops", "events", "reminders"]

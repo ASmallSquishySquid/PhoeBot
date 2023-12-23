@@ -79,13 +79,15 @@ class Reminders(commands.Cog):
 
         Database.insert("reminders(userId, reminder, date)", """{}, "{}", "{}" """.format(ctx.author.id, reminder, dateParam))
 
+        id = Database.select("id", "reminders", """WHERE date = "{}" AND reminder = "{}" AND userId = {}""".format(dateParam, reminder, ctx.author.id))[0][0]
+
         if dateParam < (datetime.datetime.now() + datetime.timedelta(days=1)):
             async with self.lock:
-                self.reminderList.append((0, ctx.author.id, reminder, dateParam))
+                self.reminderList.append((id, ctx.author.id, reminder, dateParam))
 
         embedMessage = discord.Embed(title="Reminder created <:charmanderawr:837344550804127774>", description=reminder, color=discord.Color.og_blurple())
         embedMessage.add_field(name="Scheduled Time", value=dateParam.strftime("%m/%d/%Y at %H:%M"))
-        await ctx.send(embed=embedMessage)
+        await ctx.send(embed=embedMessage, view=DeleteButton(id))
 
     @remind.error
     async def remind_error(self, ctx, error):
@@ -110,9 +112,9 @@ class Reminders(commands.Cog):
             await ctx.send("There are no upcoming reminders <:charmanderawr:837344550804127774>")
             return
 
-        first = Database.select("reminder, date", "reminders", """WHERE userId = {} AND date > "{}" ORDER BY date LIMIT {}""".format(ctx.author.id, datetime.datetime.now(), count))
+        first = Database.select("id, reminder, date", "reminders", """WHERE userId = {} AND date > "{}" ORDER BY date LIMIT {}""".format(ctx.author.id, datetime.datetime.now(), count))
 
-        display = "\n".join(['Reminder "{}" set for {}'.format(reminder[0], reminder[1].strftime("%m/%d/%Y at %H:%M")) for reminder in first])
+        display = "\n".join(['{}: Reminder "{}" set for {}'.format(reminder[0], reminder[1], reminder[2].strftime("%m/%d/%Y at %H:%M")) for reminder in first])
         embedMessage = discord.Embed(title="Upcoming reminders <:charmanderawr:837344550804127774>", description=display, color=discord.Color.og_blurple())
 
         if total <= count:
@@ -121,6 +123,21 @@ class Reminders(commands.Cog):
 
         buttons = PageButtons(total, count, ctx.author.id, {0: display}, embedMessage)
         buttons.message = await ctx.send(embed=embedMessage, view=buttons)
+
+    @commands.command(
+        help="Delete a reminder"
+    )
+    async def delete(self, ctx: commands.Context, id: int = commands.parameter(description="The ID of the reminder being deleted")):
+        Database.delete("reminders", "WHERE id = {}".format(id))
+
+        with self.lock:
+            for i in range(len(self.reminderList)):
+                if self.reminderList[i][0] == id:
+                    self.reminderList.remove(self.reminderList[i])
+                    break
+
+        await ctx.send("Ok, deleted reminder {} <:charmanderawr:837344550804127774>".format(id))
+
 
 class SnoozeButtons(discord.ui.View):
     def __init__(self, reminderInstance: Reminders, reminder: str):
@@ -231,6 +248,10 @@ class PageButtons(discord.ui.View):
 
         self.add_item(next)
 
+class DeleteButton(discord.ui.View):
+    def __init__(self, id: int):
+        super().__init__(timeout=60)
+        self.id = id
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(Reminders(bot))

@@ -97,7 +97,8 @@ class Reminders(commands.Cog):
             await ctx.send('Please keep the reminder in one string and keep all time components separate. And no AM/PM! <:charmanderawr:837344550804127774>')
 
     @commands.command(
-        help="Get the contents of the internal reminder list"
+        help="Get the contents of the internal reminder list",
+        hidden=True
     )
     async def debug(self, ctx: commands.Context):
         await ctx.send(self.reminderList)

@@ -18,7 +18,7 @@ class Reminders(commands.Cog):
     @tasks.loop(hours=24)
     async def getReminders(self):
         async with self.lock:
-            self.reminderList = Database.select("""SELECT * FROM reminders WHERE date >= datetime("now", "localtime") AND date < datetime("now", "localtime", "1 day");""")
+            self.reminderList = Database.select("*", "reminders", """WHERE date >= datetime("now", "localtime") AND date < datetime("now", "localtime", "1 day")""")
 
         if not self.sendReminders.is_running():
             self.sendReminders.start()
@@ -77,7 +77,7 @@ class Reminders(commands.Cog):
             elif lowerComponent.endswith("s"):
                 dateParam = dateParam + datetime.timedelta(seconds=int(lowerComponent[:-1]))
 
-        Database.insert("""INSERT INTO reminders(userId, reminder, date) VALUES ({}, "{}", "{}");""".format(ctx.author.id, reminder, dateParam))
+        Database.insert("reminders(userId, reminder, date)", """{}, "{}", "{}" """.format(ctx.author.id, reminder, dateParam))
 
         if dateParam < (datetime.datetime.now() + datetime.timedelta(days=1)):
             async with self.lock:
@@ -110,14 +110,8 @@ class Reminders(commands.Cog):
             await ctx.send("There are no upcoming reminders <:charmanderawr:837344550804127774>")
             return
 
-        first = Database.select("""
-            SELECT reminder, date
-            FROM reminders
-            WHERE userId = {} AND date > "{}"
-            ORDER BY date
-            LIMIT {};
-            """.format(ctx.author.id, datetime.datetime.now(), count))
-        
+        first = Database.select("reminder, date", "reminders", """WHERE userId = {} AND date > "{}" ORDER BY date LIMIT {}""".format(ctx.author.id, datetime.datetime.now(), count))
+
         display = "\n".join(['Reminder "{}" set for {}'.format(reminder[0], reminder[1].strftime("%m/%d/%Y at %H:%M")) for reminder in first])
         embedMessage = discord.Embed(title="Upcoming reminders <:charmanderawr:837344550804127774>", description=display, color=discord.Color.og_blurple())
 
@@ -158,7 +152,7 @@ class SnoozeButtons(discord.ui.View):
 
         dateParam = datetime.datetime.now() + datetime.timedelta(minutes=delay)
 
-        Database.insert("""INSERT INTO reminders(userId, reminder, date) VALUES ({}, "{}", "{}");""".format(interaction.user.id, self.reminder, dateParam))
+        Database.insert("reminders(userId, reminder, date)", """{}, "{}", "{}" """.format(interaction.user.id, self.reminder, dateParam))
 
         if dateParam < (datetime.datetime.now() + datetime.timedelta(days=1)):
             self.reminderInstance.reminderList.append((0, interaction.user.id, self.reminder, dateParam))
@@ -189,12 +183,11 @@ class PageButtons(discord.ui.View):
 
     def getPage(self):
         if not self.index in self.pages:
-            reminders = Database.select("""
-                SELECT reminder, date
-                FROM reminders
-                WHERE userId = {} AND date > "{}"
-                ORDER BY date
-                LIMIT {} OFFSET {};
+            reminders = Database.select(
+                "reminder, date", "reminders", 
+                """WHERE userId = {} AND date > "{}" 
+                    ORDER BY date 
+                    LIMIT {} OFFSET {}
                 """.format(self.userId, datetime.datetime.now(), self.count, self.index * self.count))
 
             page = "\n".join(['Reminder "{}" set for {}'.format(reminder[0], reminder[1].strftime("%m/%d/%Y at %H:%M")) for reminder in reminders])

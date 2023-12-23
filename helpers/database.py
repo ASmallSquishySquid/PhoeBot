@@ -4,12 +4,12 @@ import sqlite3
 class Database():
     connection = None
 
-    def select(query: str) -> list:
+    def select(columns: str, table: str, filters: str = "") -> list:
         if Database.connection is None:
             Database.connect()
 
         cursor = Database.connection.cursor()
-        cursor.execute(query)
+        cursor.execute("""SELECT {} FROM {} {};""".format(columns, table, filters))
 
         results = list(cursor.fetchall())
 
@@ -17,16 +17,26 @@ class Database():
 
         return results
 
-    def insert(query: str) -> None:
+    def insert(tableAndCols: str, values: str, ignore: bool = False) -> None:
         if Database.connection is None:
             Database.connect()
 
         cursor = Database.connection.cursor()
-        cursor.execute(query)
+
+        cursor.execute("""INSERT {} INTO {} VALUES({});""".format("OR IGNORE" if ignore else "", tableAndCols, values))
         cursor.close()
         Database.connection.commit()
 
-    def count(table: str, filters: str) -> int:
+    def delete(table: str, filters: str = "") -> None:
+        if Database.connection is None:
+            Database.connect()
+
+        cursor = Database.connection.cursor()
+        cursor.execute("""DELETE FROM {} {};""".format(table, filters))
+        cursor.close()
+        Database.connection.commit()
+
+    def count(table: str, filters: str = "") -> int:
         if Database.connection is None:
             Database.connect()
 
@@ -38,6 +48,18 @@ class Database():
         cursor.close()
 
         return count
+    
+    def query(query: str) -> list:
+        if Database.connection is None:
+            Database.connect()
+
+        cursor = Database.connection.cursor()
+        cursor.execute(query)
+        result = list(cursor.fetchall())
+        cursor.close()
+        Database.connection.commit()
+
+        return result
 
     def connect() -> None:
         package_dir = os.path.abspath(os.path.dirname(__file__))

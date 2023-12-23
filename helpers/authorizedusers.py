@@ -7,7 +7,7 @@ class AuthorizedUsers():
     def getUserSet() -> set:
         # Pull from the database if we haven't yet
         if (len(AuthorizedUsers.users) == AuthorizedUsers.numAdded):
-            userIds = Database.select("SELECT id FROM users;")
+            userIds = Database.select("id", "users")
             for userId in userIds:
                 AuthorizedUsers.users.add(userId[0])
 
@@ -20,4 +20,4 @@ class AuthorizedUsers():
         AuthorizedUsers.users.add(userId)
         AuthorizedUsers.numAdded += 1
 
-        Database.insert("""INSERT OR IGNORE INTO users VALUES ({}, "{}");""".format(userId, username))
+        Database.insert("users", """{}, "{}" """.format(userId, username), True)

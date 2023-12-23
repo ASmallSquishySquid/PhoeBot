@@ -87,7 +87,7 @@ class Reminders(commands.Cog):
 
         embedMessage = discord.Embed(title="Reminder created <:charmanderawr:837344550804127774>", description=reminder, color=discord.Color.og_blurple())
         embedMessage.add_field(name="Scheduled Time", value=dateParam.strftime("%m/%d/%Y at %H:%M"))
-        await ctx.send(embed=embedMessage, view=DeleteButton(id))
+        await ctx.send(embed=embedMessage, view=DeleteButton(self, embedMessage, id))
 
     @remind.error
     async def remind_error(self, ctx, error):
@@ -130,13 +130,16 @@ class Reminders(commands.Cog):
     async def delete(self, ctx: commands.Context, id: int = commands.parameter(description="The ID of the reminder being deleted")):
         Database.delete("reminders", "WHERE id = {}".format(id))
 
-        with self.lock:
+        await self.remove_from_reminders(id)
+
+        await ctx.send("Ok, deleted reminder {} <:charmanderawr:837344550804127774>".format(id))
+
+    async def remove_from_reminders(self, id):
+        async with self.lock:
             for i in range(len(self.reminderList)):
                 if self.reminderList[i][0] == id:
                     self.reminderList.remove(self.reminderList[i])
                     break
-
-        await ctx.send("Ok, deleted reminder {} <:charmanderawr:837344550804127774>".format(id))
 
 
 class SnoozeButtons(discord.ui.View):
@@ -159,7 +162,7 @@ class SnoozeButtons(discord.ui.View):
     async def delay_30_button(self, interaction: discord.Interaction, button: discord.ui.Button):
         await self.__add_time(interaction, 30)
 
-    @discord.ui.button(label="1 hour",style=discord.ButtonStyle.secondary,emoji="⏰")
+    @discord.ui.button(label="1 hour", style=discord.ButtonStyle.secondary, emoji="⏰")
     async def delay_60_button(self, interaction: discord.Interaction, button: discord.ui.Button):
         await self.__add_time(interaction, 60)
 
@@ -249,9 +252,20 @@ class PageButtons(discord.ui.View):
         self.add_item(next)
 
 class DeleteButton(discord.ui.View):
-    def __init__(self, id: int):
+    def __init__(self, reminderInstance: Reminders, embedMessage: discord.Embed, id: int):
         super().__init__(timeout=60)
+        self.reminderInstance = reminderInstance
+        self.embedMessage = embedMessage
         self.id = id
+
+    @discord.ui.button(label="Delete", style=discord.ButtonStyle.red, emoji="<:romani_nervous:746062766825013269>")
+    async def delete_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+        Database.delete("reminders", "WHERE id = {}".format(self.id))
+
+        await self.reminderInstance.remove_from_reminders(self.id)
+
+        self.embedMessage.title = "Reminder DELETED <:romani_nervous:746062766825013269>"
+        await interaction.response.edit_message(embed=self.embedMessage)
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(Reminders(bot))

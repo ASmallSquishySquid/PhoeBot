@@ -259,14 +259,22 @@ class DeleteButton(discord.ui.View):
         self.embedMessage = embedMessage
         self.id = id
 
+    async def on_timeout(self):
+        for child in self.children:
+            child.disabled = True
+
+        await self.message.edit(view=self)
+
     @discord.ui.button(label="Delete", style=discord.ButtonStyle.red, emoji="<:romani_nervous:746062766825013269>")
     async def delete_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+        button.disabled = True
+
         Database.delete("reminders", "WHERE id = {}".format(self.id))
 
         await self.reminderInstance.remove_from_reminders(self.id)
 
         self.embedMessage.title = "Reminder DELETED <:romani_nervous:746062766825013269>"
-        await interaction.response.edit_message(embed=self.embedMessage)
+        await interaction.response.edit_message(embed=self.embedMessage, view=self)
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(Reminders(bot))

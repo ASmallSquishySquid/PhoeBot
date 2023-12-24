@@ -64,6 +64,7 @@ class Loops(commands.Cog):
                     js = await request.json()
                     embedMessage = discord.Embed(title=js["title"], description=js["explanation"], url=js["url"], color=discord.Color.og_blurple())
                     embedMessage.set_author(name="NASA")
+                    embedMessage.set_thumbnail(url="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/NASA_logo.svg/110px-NASA_logo.svg.png")
                     if js["media_type"] == "image":
                         embedMessage.set_image(url=js["url"])
                     elif js["media_type"] == "video":

@@ -87,7 +87,8 @@ class Reminders(commands.Cog):
 
         embedMessage = discord.Embed(title="Reminder created <:charmanderawr:837344550804127774>", description=reminder, color=discord.Color.og_blurple())
         embedMessage.add_field(name="Scheduled Time", value=dateParam.strftime("%m/%d/%Y at %H:%M"))
-        await ctx.send(embed=embedMessage, view=DeleteButton(self, embedMessage, id))
+        buttons = DeleteButton(self, embedMessage, id)
+        buttons.message = await ctx.send(embed=embedMessage, view=buttons)
 
     @remind.error
     async def remind_error(self, ctx, error):

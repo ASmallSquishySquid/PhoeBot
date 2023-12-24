@@ -179,11 +179,9 @@ class SnoozeButtons(discord.ui.View):
         if dateParam < (datetime.datetime.now() + datetime.timedelta(days=1)):
             self.reminderInstance.reminderList.append((0, interaction.user.id, self.reminder, dateParam))
 
-        await interaction.response.edit_message(view=self)
-
         embedMessage = discord.Embed(title="Reminder snoozed <:charmanderawr:837344550804127774>", description=self.reminder, color=discord.Color.og_blurple())
         embedMessage.add_field(name="Scheduled Time", value=dateParam.strftime("%m/%d/%Y at %H:%M"))
-        await interaction.user.send(embed=embedMessage)
+        await interaction.response.edit_message(view=self, embed=embedMessage)
 
 class PageButtons(discord.ui.View):
     def __init__(self, total: int, count: int, id: int, pages: dict, embed: discord.Embed):

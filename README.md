@@ -5,7 +5,7 @@ A Discord bot that will make my life easier. It doesn't like to talk to stranger
 
 ![image](https://github.com/ASmallSquishySquid/PhoeBot/assets/78177277/4277316d-115d-4b84-b5d5-6e5e49266a65)
 
-* Running on a Raspberry Pi Zero W.
-* CI/CD with Jenkins, ngrok, Docker, and Bash scripts.
+* Running as a service on a Raspberry Pi Zero W.
+* CI/CD with Jenkins, ngrok, and Docker.
 
 ![phoebot-basic-demo](https://github.com/ASmallSquishySquid/PhoeBot/assets/78177277/f0cea228-d5ef-40ad-9f6e-cd5dd9df0cdc)

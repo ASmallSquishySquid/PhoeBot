@@ -1,4 +1,5 @@
 from discord.ext import commands
+from datetime import datetime
 
 from helpers.authorizedusers import AuthorizedUsers
 
@@ -20,7 +21,7 @@ class Events(commands.Cog):
     @commands.Cog.listener()
     async def on_presence_update(self, before, after):
         # Ask to play OW or Val if I started playing
-        if (before.id != 274397067177361408):
+        if (before.id != 274397067177361408) or datetime.now() > datetime.now().replace(hour=19, minute=0) or datetime.now() < datetime.now().replace(hour=7, minute=0):
             return
         
         oldPlaying = [game.name for game in before.activities if str(game.type) == "ActivityType.playing"]

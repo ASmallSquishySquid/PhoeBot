@@ -22,6 +22,13 @@ class AuthorizedUsers():
         AuthorizedUsers.numAdded += 1
 
         Database.insert("users", """{}, "{}" """.format(userId, username), True)
+    
+    def removeUser(userId: int):
+        if not userId in AuthorizedUsers.users:
+            return
+        
+        AuthorizedUsers.users.remove(userId)
+        Database.delete("users", "WHERE id={}".format(userId))
 
     def isAuthorized(userId: int) -> bool:
         return userId in AuthorizedUsers.users

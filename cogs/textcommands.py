@@ -18,8 +18,10 @@ class TextCommands(commands.Cog):
         await ctx.send("Today is " + str(datetime.date.today().strftime('%m/%d/%Y')) + " <:charmanderawr:837344550804127774>")
 
     @commands.command(
-        help="Hehehe boop"
+        help="Hehehe boop",
+        hidden=True
     )
+    @commands.is_owner()
     async def heh(self, ctx: commands.Context):
         if not ctx.author.id == 274397067177361408:
             await ctx.send("Sorry, but you can't use this command <:charmanderawr:837344550804127774>")
@@ -61,12 +63,26 @@ class TextCommands(commands.Cog):
         help="Authorize a user",
         hidden=True
     )
+    @commands.is_owner()
     async def authorize(self, ctx: commands.Context, user: discord.User = commands.parameter(description="The user being authorized")):
         name = user.global_name
         if name is None:
             name = user.name
         AuthorizedUsers.addUser(user.id, name)
         await ctx.send("User " + name + " is no longer a stranger <:charmanderawr:837344550804127774>")
+
+    @commands.command(
+        help="Remove authorization from a user",
+        hidden=True
+    )
+    @commands.is_owner()
+    async def unauthorize(self, ctx: commands.Context, user: discord.User = commands.parameter(description="The user to remove authorization from")):
+        AuthorizedUsers.removeUser(user.id)
+
+        name = user.global_name
+        if name is None:
+            name = user.name
+        await ctx.send("User " + name + " is dead to me <:charmanderawr:837344550804127774>")
 
     @commands.command(
         help="Get the sauce"

@@ -88,9 +88,9 @@ class Reminders(commands.Cog):
             elif lowerComponent.endswith("s"):
                 dateParam = dateParam + datetime.timedelta(seconds=int(lowerComponent[:-1]))
 
-        Database.insert("reminders(userId, reminder, date)", """{}, "{}", "{}" """.format(ctx.author.id, reminder, dateParam))
+        Database.insert("reminders(userId, reminder, date)", f"""{ctx.author.id}, "{reminder}", "{dateParam}" """)
 
-        id = Database.select("id", "reminders", """WHERE date = "{}" AND reminder = "{}" AND userId = {}""".format(dateParam, reminder, ctx.author.id))[0][0]
+        id = Database.select("id", "reminders", f"""WHERE date = "{dateParam}" AND reminder = "{reminder}" AND userId = {ctx.author.id}""")[0][0]
 
         if dateParam < (datetime.datetime.now() + datetime.timedelta(days=1)):
             async with self.lock:
@@ -119,38 +119,39 @@ class Reminders(commands.Cog):
         help="Get your future reminders"
     )
     async def reminders(self, ctx: commands.Context, count: int = commands.parameter(default=10, description="Number of reminders per page")):
-        total = Database.count("reminders", """WHERE userId = {} AND date > "{}" """.format(ctx.author.id, datetime.datetime.now()))
+        now = datetime.datetime.now()
+        total = Database.count("reminders", f"""WHERE userId = {ctx.author.id} AND date > "{now}" """)
 
         if total == 0:
             await ctx.send("There are no upcoming reminders <:charmanderawr:837344550804127774>")
             return
 
-        first = Database.select("id, reminder, date", "reminders", """WHERE userId = {} AND date > "{}" ORDER BY date LIMIT {}""".format(ctx.author.id, datetime.datetime.now(), count))
+        first = Database.select("id, reminder, date", "reminders", f"""WHERE userId = {ctx.author.id} AND date > "{now}" ORDER BY date LIMIT {count}""")
 
-        display = "\n".join(['{}: Reminder "{}" set for {}'.format(reminder[0], reminder[1], reminder[2].strftime("%m/%d/%Y at %H:%M")) for reminder in first])
+        display = "\n".join([f'{reminder[0]}: Reminder "{reminder[1]}" set for {reminder[2].strftime("%m/%d/%Y at %H:%M")}' for reminder in first])
         embedMessage = discord.Embed(title="Upcoming reminders <:charmanderawr:837344550804127774>", description=display, color=discord.Color.og_blurple())
 
         if total <= count:
             await ctx.send(embed=embedMessage)
             return
 
-        buttons = PageButtons(total, count, ctx.author.id, {0: display}, embedMessage)
+        buttons = PageButtons(total, count, now, ctx.author.id, {0: display}, embedMessage)
         buttons.message = await ctx.send(embed=embedMessage, view=buttons)
 
     @commands.command(
         help="Delete a reminder"
     )
     async def delete(self, ctx: commands.Context, id: int = commands.parameter(description="The ID of the reminder being deleted")):
-        reminders = Database.select("*", "reminders", "WHERE id = {} and userId = {}".format(id, ctx.author.id))
+        reminders = Database.select("*", "reminders", f"WHERE id = {id} and userId = {ctx.author.id}")
         if len(reminders) == 0:
             await ctx.send("You can't delete reminders that aren't yours! <:charmanderawr:837344550804127774>")
             return
 
-        Database.delete("reminders", "WHERE id = {}".format(id))
+        Database.delete("reminders", f"WHERE id = {id}")
 
         await self.remove_from_reminders(id)
 
-        await ctx.send("Ok, deleted reminder {} <:charmanderawr:837344550804127774>".format(id))
+        await ctx.send(f"Ok, deleted reminder {id} <:charmanderawr:837344550804127774>")
 
     async def remove_from_reminders(self, id):
         async with self.lock:
@@ -190,9 +191,9 @@ class SnoozeButtons(discord.ui.View):
 
         dateParam = datetime.datetime.now() + datetime.timedelta(minutes=delay)
 
-        Database.insert("reminders(userId, reminder, date)", """{}, "{}", "{}" """.format(interaction.user.id, self.reminder, dateParam))
+        Database.insert("reminders(userId, reminder, date)", f"""{interaction.user.id}, "{self.reminder}", "{dateParam}" """)
 
-        id = Database.select("id", "reminders", """WHERE date = "{}" AND reminder = "{}" AND userId = {}""".format(dateParam, self.reminder, interaction.user.id))[0][0]
+        id = Database.select("id", "reminders", f"""WHERE date = "{dateParam}" AND reminder = "{self.reminder}" AND userId = {interaction.user.id}""")[0][0]
 
         if dateParam < (datetime.datetime.now() + datetime.timedelta(days=1)):
             self.reminderInstance.reminderList.append((id, interaction.user.id, self.reminder, dateParam))
@@ -202,11 +203,12 @@ class SnoozeButtons(discord.ui.View):
         await interaction.response.edit_message(view=self, embed=embedMessage)
 
 class PageButtons(discord.ui.View):
-    def __init__(self, total: int, count: int, id: int, pages: dict, embed: discord.Embed):
+    def __init__(self, total: int, count: int, now: datetime, id: int, pages: dict, embed: discord.Embed):
         super().__init__(timeout=60)
         self.userId = id
         self.total = total
         self.count = count
+        self.now = now
         self.index = 0
         self.pages = pages
         self.embed = embed
@@ -223,12 +225,12 @@ class PageButtons(discord.ui.View):
         if not self.index in self.pages:
             reminders = Database.select(
                 "reminder, date", "reminders", 
-                """WHERE userId = {} AND date > "{}" 
+                f"""WHERE userId = {self.userId} AND date > "{self.now}" 
                     ORDER BY date 
-                    LIMIT {} OFFSET {}
-                """.format(self.userId, datetime.datetime.now(), self.count, self.index * self.count))
+                    LIMIT {self.count} OFFSET {self.index * self.count}
+                """)
 
-            page = "\n".join(['Reminder "{}" set for {}'.format(reminder[0], reminder[1].strftime("%m/%d/%Y at %H:%M")) for reminder in reminders])
+            page = "\n".join([f'Reminder "{reminder[0]}" set for {reminder[1].strftime("%m/%d/%Y at %H:%M")}' for reminder in reminders])
 
             self.pages[self.index] = page
 
@@ -286,7 +288,7 @@ class DeleteButton(discord.ui.View):
     async def delete_button(self, interaction: discord.Interaction, button: discord.ui.Button):
         button.disabled = True
 
-        Database.delete("reminders", "WHERE id = {}".format(self.id))
+        Database.delete("reminders", f"WHERE id = {self.id}")
 
         await self.reminderInstance.remove_from_reminders(self.id)
 

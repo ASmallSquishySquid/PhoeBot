@@ -9,7 +9,7 @@ class Database():
             Database.connect()
 
         cursor = Database.connection.cursor()
-        cursor.execute("""SELECT {} FROM {} {};""".format(columns, table, filters))
+        cursor.execute(f"""SELECT {columns} FROM {table} {filters};""")
 
         results = list(cursor.fetchall())
 
@@ -23,7 +23,7 @@ class Database():
 
         cursor = Database.connection.cursor()
 
-        cursor.execute("""INSERT {} INTO {} VALUES({});""".format("OR IGNORE" if ignore else "", tableAndCols, values))
+        cursor.execute(f"""INSERT {"OR IGNORE" if ignore else ""} INTO {tableAndCols} VALUES({values});""")
         cursor.close()
         Database.connection.commit()
 
@@ -32,7 +32,7 @@ class Database():
             Database.connect()
 
         cursor = Database.connection.cursor()
-        cursor.execute("""DELETE FROM {} {};""".format(table, filters))
+        cursor.execute(f"DELETE FROM {table} {filters};")
         cursor.close()
         Database.connection.commit()
 
@@ -41,7 +41,7 @@ class Database():
             Database.connect()
 
         cursor = Database.connection.cursor()
-        cursor.execute("""SELECT COUNT(*) FROM {} {};""".format(table, filters))
+        cursor.execute(f"SELECT COUNT(*) FROM {table} {filters};")
 
         count = cursor.fetchone()[0]
 

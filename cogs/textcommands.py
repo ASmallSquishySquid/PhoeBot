@@ -77,6 +77,10 @@ class TextCommands(commands.Cog):
     )
     @commands.is_owner()
     async def unauthorize(self, ctx: commands.Context, user: discord.User = commands.parameter(description="The user to remove authorization from")):
+        if user.id == 274397067177361408:
+            await ctx.send("You can't unauthorize yourself!")
+            return
+
         AuthorizedUsers.removeUser(user.id)
 
         name = user.global_name

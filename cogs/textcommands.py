@@ -74,6 +74,14 @@ class TextCommands(commands.Cog):
     async def sauce(self, ctx: commands.Context):
         await ctx.send("https://github.com/ASmallSquishySquid/PhoeBot")
 
+    @commands.command(
+        help="Add the bot to your server",
+        hidden=True
+    )
+    @commands.is_owner()
+    async def invite(self, ctx: commands.Context):
+        await ctx.send("https://discord.com/api/oauth2/authorize?client_id=874820032968921209&permissions=379904&scope=bot")
+
     
 async def setup(bot: commands.Bot):
     await bot.add_cog(TextCommands(bot))

@@ -141,6 +141,11 @@ class Reminders(commands.Cog):
         help="Delete a reminder"
     )
     async def delete(self, ctx: commands.Context, id: int = commands.parameter(description="The ID of the reminder being deleted")):
+        reminders = Database.select("*", "reminders", "WHERE id = {} and userId = {}".format(id, ctx.author.id))
+        if len(reminders) == 0:
+            await ctx.send("You can't delete reminders that aren't yours! <:charmanderawr:837344550804127774>")
+            return
+
         Database.delete("reminders", "WHERE id = {}".format(id))
 
         await self.remove_from_reminders(id)

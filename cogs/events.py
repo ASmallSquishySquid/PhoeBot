@@ -12,8 +12,8 @@ class Events(commands.Cog):
         if message.author == self.bot.user:
             return
         
-        if not message.author.id in AuthorizedUsers.getUserSet():
-            await message.reply(AuthorizedUsers.unauthorizedMessage)
+        if not AuthorizedUsers.isAuthorized(message.author.id):
+            return
 
         elif message.content.lower().startswith("hi") or message.content.lower().startswith("hello") :
             await message.reply("Hello! <:charmanderawr:837344550804127774>", mention_author=True)

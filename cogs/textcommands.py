@@ -23,10 +23,6 @@ class TextCommands(commands.Cog):
     )
     @commands.is_owner()
     async def heh(self, ctx: commands.Context):
-        if not ctx.author.id == 274397067177361408:
-            await ctx.send("Sorry, but you can't use this command <:charmanderawr:837344550804127774>")
-            return
-
         josie = self.bot.get_user(559828298973184011)
         if josie is None:
             josie = await self.bot.fetch_user(559828298973184011)
@@ -49,22 +45,21 @@ class TextCommands(commands.Cog):
         help="Gets the link to your currently playing song on Spotify",
         brief="Spotify now playing"
     )
+    @commands.guild_only()
     async def np(self, ctx: commands.Context):
         # Only works when sent in a server
-        if isinstance(ctx.author, discord.Member):
-            for activity in ctx.author.activities:
-                if isinstance(activity, discord.Spotify):
-                    await ctx.send("https://open.spotify.com/track/" + activity.track_id)
-                    return
-            await ctx.send("You are not currently listening to anything on Spotify <:charmanderawr:837344550804127774>")
-        else:
-            await ctx.send("Can not get user's Spotify status in DMs <:judgemental:748787284811186216>")
+        for activity in ctx.author.activities:
+            if isinstance(activity, discord.Spotify):
+                await ctx.send("https://open.spotify.com/track/" + activity.track_id)
+                return
+        await ctx.send("You are not currently listening to anything on Spotify <:charmanderawr:837344550804127774>")
 
     @commands.command(
         help="Authorize a user",
         hidden=True
     )
     @commands.is_owner()
+    @commands.guild_only()
     async def authorize(self, ctx: commands.Context, user: discord.User = commands.parameter(description="The user being authorized")):
         name = user.global_name
         if name is None:
@@ -77,6 +72,7 @@ class TextCommands(commands.Cog):
         hidden=True
     )
     @commands.is_owner()
+    @commands.guild_only()
     async def unauthorize(self, ctx: commands.Context, user: discord.User = commands.parameter(description="The user to remove authorization from")):
         if user.id == 274397067177361408:
             await ctx.send("You can't unauthorize yourself!")
@@ -101,7 +97,7 @@ class TextCommands(commands.Cog):
     )
     @commands.is_owner()
     async def invite(self, ctx: commands.Context):
-        await ctx.send("https://discord.com/api/oauth2/authorize?client_id=874820032968921209&permissions=379904&scope=bot")
+        await ctx.author.send("https://discord.com/api/oauth2/authorize?client_id=874820032968921209&permissions=379904&scope=bot")
 
     
 async def setup(bot: commands.Bot):

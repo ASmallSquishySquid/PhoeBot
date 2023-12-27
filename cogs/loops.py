@@ -25,7 +25,7 @@ class Loops(commands.Cog):
 
         phoebe = guild.get_member(274397067177361408)
         if phoebe is None:
-            phoebe = await guild.fetch_member(712909571622043728)
+            phoebe = await guild.fetch_member(274397067177361408)
 
         if (phoebe.status==discord.Status.online):
             await phoebe.send("Go to sleep! <:charmanderawr:837344550804127774>")
@@ -38,7 +38,7 @@ class Loops(commands.Cog):
 
         phoebe = guild.get_member(274397067177361408)
         if phoebe is None:
-            phoebe = await guild.fetch_member(712909571622043728)
+            phoebe = await guild.fetch_member(274397067177361408)
 
         if (phoebe.status==discord.Status.online):
             await phoebe.send("Drink some water! <:charmanderawr:837344550804127774>")

@@ -31,6 +31,7 @@ class TextCommands(commands.Cog):
         if josie is None:
             josie = await self.bot.fetch_user(559828298973184011)
         await josie.send("Boop <a:mmaPokeAnnoyLove:764772302680227890>")
+        await ctx.send("Tactical boop launched <a:mmaDanceGrooveMilk:764678198637101083>")
 
     @commands.command(
         help="Get a random cat fact",

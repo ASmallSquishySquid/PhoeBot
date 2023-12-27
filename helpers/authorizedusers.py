@@ -3,6 +3,7 @@ from helpers.database import Database
 class AuthorizedUsers():
     users = set()
     numAdded = 0
+    unauthorizedMessage = "Sorry, I don't talk to strangers <:mmSweatUhhMocha:764772302403272704>"
 
     def getUserSet() -> set:
         # Pull from the database if we haven't yet
@@ -21,3 +22,6 @@ class AuthorizedUsers():
         AuthorizedUsers.numAdded += 1
 
         Database.insert("users", """{}, "{}" """.format(userId, username), True)
+
+    def isAuthorized(userId: int) -> bool:
+        return userId in AuthorizedUsers.users

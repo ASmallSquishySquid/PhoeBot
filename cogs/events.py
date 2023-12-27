@@ -13,7 +13,7 @@ class Events(commands.Cog):
             return
         
         if not message.author.id in AuthorizedUsers.getUserSet():
-            await message.reply("Sorry, I don't talk to strangers <:mmSweatUhhMocha:764772302403272704>")
+            await message.reply(AuthorizedUsers.unauthorizedMessage)
 
         elif message.content.lower().startswith("hi") or message.content.lower().startswith("hello") :
             await message.reply("Hello! <:charmanderawr:837344550804127774>", mention_author=True)

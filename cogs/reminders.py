@@ -65,9 +65,20 @@ class Reminders(commands.Cog):
                     dateParam = dateParam + datetime.timedelta(days=1)
             elif "/" in lowerComponent:
                 parts = lowerComponent.split("/")
-                dateParam = dateParam.replace(month=int(parts[0]), day=int(parts[1]))
+                newDate = dateParam.replace(month=int(parts[0]), day=int(parts[1]))
+
+                # Check if the date is meant for next year
+                if newDate < dateParam:
+                    newDate = newDate.replace(year=newDate.year + 1)
+
+                dateParam = newDate
+
                 if (len(parts) == 3):
-                    dateParam = dateParam.replace(year=int(parts[2]))
+                    year=int(parts[2])
+                    # Fix two digit years
+                    if len(parts[2]) == 2:
+                        year += 2000
+                    dateParam = dateParam.replace(year=year)
             elif lowerComponent.endswith("d"):
                 dateParam = dateParam + datetime.timedelta(days=int(lowerComponent[:-1]))
             elif lowerComponent.endswith("h"):

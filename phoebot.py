@@ -1,7 +1,7 @@
-import sys
+import datetime
 import discord
 import os
-import datetime
+import sys
 import traceback
 
 from discord.ext import commands
@@ -12,7 +12,7 @@ from helpers.authorizedusers import AuthorizedUsers
 sys.stdout = open("../phoebot_logs/{}.log".format(datetime.datetime.now().strftime("%m:%d:%Y-%H:%M")), 'w')
 sys.stderr = sys.stdout
 
-cogs = ["textcommands", "loops", "events", "reminders"]
+cogs = ["textcommands", "loops", "events", "reminders", "recipes"]
 
 class PhoeBot(Bot):
     def __init__(self, command_prefix, intents: discord.Intents, activity):
@@ -23,7 +23,7 @@ bot = PhoeBot(command_prefix="!", intents=discord.Intents.all(), activity=discor
 
 @bot.event
 async def on_ready():
-    print("We have logged in as {0.user}".format(bot))
+    print("We have logged in as {0.user}".format(bot), flush=True)
     AuthorizedUsers.startup()
     for cog in cogs:
         await bot.load_extension("cogs." + cog)
@@ -41,11 +41,12 @@ async def blockUnauthorizedUsers(ctx: discord.ext.commands.Context):
 # Based on https://gist.github.com/EvieePy/7822af90858ef65012ea500bcecf1612
 @bot.event
 async def on_command_error(ctx, error):
-    if hasattr(ctx.command, "on_error"):
+    command = ctx.command
+    if command and command.has_error_handler():
         return
 
     cog = ctx.cog
-    if cog and cog._get_overridden_method(cog.cog_command_error) is not None:
+    if cog and cog.has_error_handler():
         return
 
     error = getattr(error, "original", error)
@@ -59,6 +60,7 @@ async def on_command_error(ctx, error):
     else:
         print(f"Ignoring exception in command {ctx.command}:", file=sys.stderr)
         traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
+        sys.stderr.flush()
 
 
 bot.run(os.getenv("BOT_TOKEN"))

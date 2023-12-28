@@ -1,3 +1,4 @@
+import os
 import aiohttp
 import discord
 import datetime
@@ -19,29 +20,33 @@ class Loops(commands.Cog):
 
     @tasks.loop(minutes=15)
     async def sleepyTime(self):
-        guild = self.bot.get_guild(712909571622043728)
+        guildId = int(os.getenv("DUCK_SERVER_ID"))
+        guild = self.bot.get_guild(guildId)
         if guild is None:
-            guild = await self.bot.fetch_guild(712909571622043728)
+            guild = await self.bot.fetch_guild(guildId)
 
-        phoebe = guild.get_member(274397067177361408)
-        if phoebe is None:
-            phoebe = await guild.fetch_member(274397067177361408)
+        userId = int(os.getenv("SQIDJI_ID"))
+        sqidji = guild.get_member(userId)
+        if sqidji is None:
+            sqidji = await guild.fetch_member(userId)
 
-        if (phoebe.status==discord.Status.online):
-            await phoebe.send("Go to sleep! <:charmanderawr:837344550804127774>")
+        if (sqidji.status==discord.Status.online):
+            await sqidji.send("Go to sleep! <:charmanderawr:837344550804127774>")
 
     @tasks.loop(minutes=30)
     async def drinkWater(self):
-        guild = self.bot.get_guild(712909571622043728)
+        guildId = int(os.getenv("DUCK_SERVER_ID"))
+        guild = self.bot.get_guild(guildId)
         if guild is None:
-            guild = await self.bot.fetch_guild(712909571622043728)
+            guild = await self.bot.fetch_guild(guildId)
 
-        phoebe = guild.get_member(274397067177361408)
-        if phoebe is None:
-            phoebe = await guild.fetch_member(274397067177361408)
+        userId = int(os.getenv("SQIDJI_ID"))
+        sqidji = guild.get_member(userId)
+        if sqidji is None:
+            sqidji = await guild.fetch_member(userId)
 
-        if (phoebe.status==discord.Status.online):
-            await phoebe.send("Drink some water! <:charmanderawr:837344550804127774>")
+        if (sqidji.status==discord.Status.online):
+            await sqidji.send("Drink some water! <:charmanderawr:837344550804127774>")
 
     # 11:30 PM
     @tasks.loop(time=datetime.time(hour=7, minute=30))
@@ -70,11 +75,12 @@ class Loops(commands.Cog):
                     elif js["media_type"] == "video":
                         embedMessage.set_image(url=js["thumbnail_url"])
 
-                    phoebe = self.bot.get_user(274397067177361408)
-                    if phoebe is None:
-                        phoebe = await self.bot.fetch_user(712909571622043728)
+                    userId = int(os.getenv("SQIDJI_ID"))
+                    sqidji = self.bot.get_user(userId)
+                    if sqidji is None:
+                        sqidji = await self.bot.fetch_user(userId)
 
-                    await phoebe.send(embed=embedMessage)
+                    await sqidji.send(embed=embedMessage)
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(Loops(bot))

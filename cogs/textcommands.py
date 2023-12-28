@@ -1,3 +1,4 @@
+import os
 import aiohttp
 import datetime
 import discord
@@ -23,9 +24,10 @@ class TextCommands(commands.Cog):
     )
     @commands.is_owner()
     async def heh(self, ctx: commands.Context):
-        josie = self.bot.get_user(559828298973184011)
+        userId = int(os.getenv("BLIST_ID"))
+        josie = self.bot.get_user(userId)
         if josie is None:
-            josie = await self.bot.fetch_user(559828298973184011)
+            josie = await self.bot.fetch_user(userId)
         await josie.send("Boop <a:mmaPokeAnnoyLove:764772302680227890>")
         await ctx.send("Tactical boop launched <a:mmaDanceGrooveMilk:764678198637101083>")
 

@@ -16,7 +16,7 @@ cogs = ["textcommands", "loops", "events", "reminders"]
 
 class PhoeBot(Bot):
     def __init__(self, command_prefix, intents: discord.Intents, activity):
-        super().__init__(command_prefix=command_prefix, intents=intents, activity=activity, owner_id=274397067177361408)
+        super().__init__(command_prefix=command_prefix, intents=intents, activity=activity, owner_id=int(os.getenv("SQIDJI_ID")))
 
 
 bot = PhoeBot(command_prefix="!", intents=discord.Intents.all(), activity=discord.Activity(type=discord.ActivityType.watching, name="you 👀"))

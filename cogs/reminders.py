@@ -196,7 +196,7 @@ class SnoozeButtons(discord.ui.View):
         id = Database.select("id", "reminders", f"""WHERE date = "{date_param}" AND reminder = "{self.reminder}" AND userId = {interaction.user.id}""")[0][0]
 
         if date_param < (datetime.datetime.now() + datetime.timedelta(days=1)):
-            self.reminderInstance.reminderList.append((id, interaction.user.id, self.reminder, date_param))
+            self.reminder_instance.reminder_cache.append((id, interaction.user.id, self.reminder, date_param))
 
         embed_message = discord.Embed(title="Reminder snoozed <:charmanderawr:837344550804127774>", description=self.reminder, color=discord.Color.og_blurple())
         embed_message.add_field(name="Scheduled Time", value=date_param.strftime("%m/%d/%Y at %H:%M"))

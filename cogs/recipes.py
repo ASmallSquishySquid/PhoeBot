@@ -23,21 +23,21 @@ class Recipes(commands.Cog):
                     js = await response.json()
 
                     total = int(js["to"]) - int(js["from"]) + 1
-                    embedMessage = Recipes.build_recipe_embed(js["hits"][0]["recipe"], 0, total)
-                    buttons = PageButtons(total, js["hits"], {0: embedMessage})
+                    embed_message = Recipes.build_recipe_embed(js["hits"][0]["recipe"], 0, total)
+                    buttons = PageButtons(total, js["hits"], {0: embed_message})
 
-                    buttons.message = await ctx.send(embed=embedMessage, view=buttons)
+                    buttons.message = await ctx.send(embed=embed_message, view=buttons)
 
-    def build_recipe_embed(recipeJs, index, total) -> discord.Embed:
-        ingredients = "\n".join([ingredient for ingredient in recipeJs["ingredientLines"]])
-        embedMessage = discord.Embed(title=recipeJs["label"], url=recipeJs["url"], color=discord.Color.green())
-        embedMessage.set_author(name=recipeJs["source"])
-        embedMessage.set_image(url=recipeJs["image"])
-        embedMessage.set_footer(text=f"Result {index + 1} of {total}")
-        embedMessage.add_field(name="Cook time", value=f'{int(recipeJs["totalTime"])} minutes', inline=False)
-        embedMessage.add_field(name="Ingredients", value=ingredients, inline=False)
+    def build_recipe_embed(recipe_js, index, total) -> discord.Embed:
+        ingredients = "\n".join([ingredient for ingredient in recipe_js["ingredientLines"]])
+        embed_message = discord.Embed(title=recipe_js["label"], url=recipe_js["url"], color=discord.Color.green())
+        embed_message.set_author(name=recipe_js["source"])
+        embed_message.set_image(url=recipe_js["image"])
+        embed_message.set_footer(text=f"Result {index + 1} of {total}")
+        embed_message.add_field(name="Cook time", value=f'{int(recipe_js["totalTime"])} minutes', inline=False)
+        embed_message.add_field(name="Ingredients", value=ingredients, inline=False)
 
-        return embedMessage
+        return embed_message
     
 class PageButtons(discord.ui.View):
     def __init__(self, total: int, hits: dict, embeds: dict):
@@ -55,7 +55,7 @@ class PageButtons(discord.ui.View):
 
         await self.message.edit(view=self)
 
-    def getEmbed(self):
+    def get_embed(self):
         if not self.index in self.embeds:
             embed = Recipes.build_recipe_embed(self.hits[self.index]["recipe"], self.index, self.total)
 
@@ -73,9 +73,9 @@ class PageButtons(discord.ui.View):
         if self.index == 0:
             button.disabled = True
 
-        embedMessage = self.getEmbed()
+        embed_message = self.get_embed()
 
-        await self.message.edit(embed=embedMessage, view=self)
+        await self.message.edit(embed=embed_message, view=self)
         await interaction.response.defer()
 
     def __add_buttons(self):
@@ -90,9 +90,9 @@ class PageButtons(discord.ui.View):
             if (self.index + 1) == self.total:
                 next.disabled = True
 
-            embedMessage = self.getEmbed()
+            embed_message = self.get_embed()
 
-            await self.message.edit(embed=embedMessage, view=self)
+            await self.message.edit(embed=embed_message, view=self)
             await interaction.response.defer()
 
         next.callback = next_button

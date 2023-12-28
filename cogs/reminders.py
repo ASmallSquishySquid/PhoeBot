@@ -10,36 +10,36 @@ from helpers.database import Database
 class Reminders(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.reminderList = []
+        self.reminder_cache = []
         self.lock = asyncio.Lock()
-        self.getReminders.start()
+        self.get_reminders.start()
 
     # every day, on startup time
     @tasks.loop(hours=24)
-    async def getReminders(self):
+    async def get_reminders(self):
         async with self.lock:
-            self.reminderList = Database.select("*", "reminders", """WHERE date >= datetime("now", "localtime") AND date < datetime("now", "localtime", "1 day")""")
+            self.reminder_cache = Database.select("*", "reminders", """WHERE date >= datetime("now", "localtime") AND date < datetime("now", "localtime", "1 day")""")
 
-        if not self.sendReminders.is_running():
-            self.sendReminders.start()
+        if not self.send_reminders.is_running():
+            self.send_reminders.start()
 
     @tasks.loop(minutes=1)
-    async def sendReminders(self):
+    async def send_reminders(self):
         later = []
         async with self.lock:
-            for reminder in self.reminderList:
+            for reminder in self.reminder_cache:
                 if reminder[3] < (datetime.datetime.now() + datetime.timedelta(minutes=1)):
                     requester = self.bot.get_user(reminder[1])
                     if requester is None:
                         requester = await self.bot.fetch_user(reminder[1])
 
-                    embedMessage = discord.Embed(title="Reminder! <:charmanderawr:837344550804127774>", description=reminder[2], color=discord.Color.og_blurple())
-                    embedMessage.add_field(name="Time", value=reminder[3].strftime("%m/%d/%Y at %H:%M"))
+                    embed_message = discord.Embed(title="Reminder! <:charmanderawr:837344550804127774>", description=reminder[2], color=discord.Color.og_blurple())
+                    embed_message.add_field(name="Time", value=reminder[3].strftime("%m/%d/%Y at %H:%M"))
                     buttons = SnoozeButtons(self, reminder[2])
-                    buttons.message = await requester.send(embed=embedMessage, view=buttons)
+                    buttons.message = await requester.send(embed=embed_message, view=buttons)
                 else:
                     later.append(reminder)
-            self.reminderList = later
+            self.reminder_cache = later
 
     @commands.command(
         help="Set a reminder"
@@ -48,58 +48,58 @@ class Reminders(commands.Cog):
         reminder: str = commands.parameter(description="What do you want to be reminded of?"), *, 
         args: str = commands.parameter(displayed_name="time", description="When do you want to be reminded?", default="1h")
     ):
-        timeArg = "".join(args)
-        dateParam = datetime.datetime.now()
+        time_arg = "".join(args)
+        date_param = datetime.datetime.now()
 
-        components = timeArg.split()
+        components = time_arg.split()
         for component in components:
-            lowerComponent = component.lower()
-            if ":" in lowerComponent:
-                parts = lowerComponent.split(":")
-                dateParam = dateParam.replace(hour=int(parts[0]), minute=int(parts[1]))
+            lower_component = component.lower()
+            if ":" in lower_component:
+                parts = lower_component.split(":")
+                date_param = date_param.replace(hour=int(parts[0]), minute=int(parts[1]))
                 if (len(parts) == 3):
-                    dateParam = dateParam.replace(second=int(parts[2]))
+                    date_param = date_param.replace(second=int(parts[2]))
 
                 # Check if the time was meant for tomorrow
-                if dateParam < datetime.datetime.now() and len(components) == 1:
-                    dateParam = dateParam + datetime.timedelta(days=1)
-            elif "/" in lowerComponent:
-                parts = lowerComponent.split("/")
-                newDate = dateParam.replace(month=int(parts[0]), day=int(parts[1]))
+                if date_param < datetime.datetime.now() and len(components) == 1:
+                    date_param = date_param + datetime.timedelta(days=1)
+            elif "/" in lower_component:
+                parts = lower_component.split("/")
+                new_date = date_param.replace(month=int(parts[0]), day=int(parts[1]))
 
                 # Check if the date is meant for next year
-                if newDate < dateParam:
-                    newDate = newDate.replace(year=newDate.year + 1)
+                if new_date < date_param:
+                    new_date = new_date.replace(year=new_date.year + 1)
 
-                dateParam = newDate
+                date_param = new_date
 
                 if (len(parts) == 3):
                     year=int(parts[2])
                     # Fix two digit years
                     if len(parts[2]) == 2:
                         year += 2000
-                    dateParam = dateParam.replace(year=year)
-            elif lowerComponent.endswith("d"):
-                dateParam = dateParam + datetime.timedelta(days=int(lowerComponent[:-1]))
-            elif lowerComponent.endswith("h"):
-                dateParam = dateParam + datetime.timedelta(hours=int(lowerComponent[:-1]))
-            elif lowerComponent.endswith("m"):
-                dateParam = dateParam + datetime.timedelta(minutes=int(lowerComponent[:-1]))
-            elif lowerComponent.endswith("s"):
-                dateParam = dateParam + datetime.timedelta(seconds=int(lowerComponent[:-1]))
+                    date_param = date_param.replace(year=year)
+            elif lower_component.endswith("d"):
+                date_param = date_param + datetime.timedelta(days=int(lower_component[:-1]))
+            elif lower_component.endswith("h"):
+                date_param = date_param + datetime.timedelta(hours=int(lower_component[:-1]))
+            elif lower_component.endswith("m"):
+                date_param = date_param + datetime.timedelta(minutes=int(lower_component[:-1]))
+            elif lower_component.endswith("s"):
+                date_param = date_param + datetime.timedelta(seconds=int(lower_component[:-1]))
 
-        Database.insert("reminders(userId, reminder, date)", f"""{ctx.author.id}, "{reminder}", "{dateParam}" """)
+        Database.insert("reminders(userId, reminder, date)", f"""{ctx.author.id}, "{reminder}", "{date_param}" """)
 
-        id = Database.select("id", "reminders", f"""WHERE date = "{dateParam}" AND reminder = "{reminder}" AND userId = {ctx.author.id}""")[0][0]
+        id = Database.select("id", "reminders", f"""WHERE date = "{date_param}" AND reminder = "{reminder}" AND userId = {ctx.author.id}""")[0][0]
 
-        if dateParam < (datetime.datetime.now() + datetime.timedelta(days=1)):
+        if date_param < (datetime.datetime.now() + datetime.timedelta(days=1)):
             async with self.lock:
-                self.reminderList.append((id, ctx.author.id, reminder, dateParam))
+                self.reminder_cache.append((id, ctx.author.id, reminder, date_param))
 
-        embedMessage = discord.Embed(title="Reminder created <:charmanderawr:837344550804127774>", description=reminder, color=discord.Color.og_blurple())
-        embedMessage.add_field(name="Scheduled Time", value=dateParam.strftime("%m/%d/%Y at %H:%M"))
-        buttons = DeleteButton(self, embedMessage, id)
-        buttons.message = await ctx.send(embed=embedMessage, view=buttons)
+        embed_message = discord.Embed(title="Reminder created <:charmanderawr:837344550804127774>", description=reminder, color=discord.Color.og_blurple())
+        embed_message.add_field(name="Scheduled Time", value=date_param.strftime("%m/%d/%Y at %H:%M"))
+        buttons = DeleteButton(self, embed_message, id)
+        buttons.message = await ctx.send(embed=embed_message, view=buttons)
 
     @remind.error
     async def remind_error(self, ctx, error):
@@ -113,7 +113,7 @@ class Reminders(commands.Cog):
         hidden=True
     )
     async def debug(self, ctx: commands.Context):
-        await ctx.send(self.reminderList)
+        await ctx.send(self.reminder_cache)
 
     @commands.command(
         help="Get your future reminders"
@@ -129,14 +129,14 @@ class Reminders(commands.Cog):
         first = Database.select("id, reminder, date", "reminders", f"""WHERE userId = {ctx.author.id} AND date > "{now}" ORDER BY date LIMIT {count}""")
 
         display = "\n".join([f'{reminder[0]}: Reminder "{reminder[1]}" set for {reminder[2].strftime("%m/%d/%Y at %H:%M")}' for reminder in first])
-        embedMessage = discord.Embed(title="Upcoming reminders <:charmanderawr:837344550804127774>", description=display, color=discord.Color.og_blurple())
+        embed_message = discord.Embed(title="Upcoming reminders <:charmanderawr:837344550804127774>", description=display, color=discord.Color.og_blurple())
 
         if total <= count:
-            await ctx.send(embed=embedMessage)
+            await ctx.send(embed=embed_message)
             return
 
-        buttons = PageButtons(total, count, now, ctx.author.id, {0: display}, embedMessage)
-        buttons.message = await ctx.send(embed=embedMessage, view=buttons)
+        buttons = PageButtons(total, count, now, ctx.author.id, {0: display}, embed_message)
+        buttons.message = await ctx.send(embed=embed_message, view=buttons)
 
     @commands.command(
         help="Delete a reminder"
@@ -155,16 +155,16 @@ class Reminders(commands.Cog):
 
     async def remove_from_reminders(self, id):
         async with self.lock:
-            for i in range(len(self.reminderList)):
-                if self.reminderList[i][0] == id:
-                    self.reminderList.remove(self.reminderList[i])
+            for i in range(len(self.reminder_cache)):
+                if self.reminder_cache[i][0] == id:
+                    self.reminder_cache.remove(self.reminder_cache[i])
                     break
 
 
 class SnoozeButtons(discord.ui.View):
-    def __init__(self, reminderInstance: Reminders, reminder: str):
+    def __init__(self, reminder_instance: Reminders, reminder: str):
         super().__init__(timeout=120)
-        self.reminderInstance = reminderInstance
+        self.reminder_instance = reminder_instance
         self.reminder = reminder
 
     async def on_timeout(self):
@@ -189,18 +189,18 @@ class SnoozeButtons(discord.ui.View):
         for child in self.children:
             child.disabled = True
 
-        dateParam = datetime.datetime.now() + datetime.timedelta(minutes=delay)
+        date_param = datetime.datetime.now() + datetime.timedelta(minutes=delay)
 
-        Database.insert("reminders(userId, reminder, date)", f"""{interaction.user.id}, "{self.reminder}", "{dateParam}" """)
+        Database.insert("reminders(userId, reminder, date)", f"""{interaction.user.id}, "{self.reminder}", "{date_param}" """)
 
-        id = Database.select("id", "reminders", f"""WHERE date = "{dateParam}" AND reminder = "{self.reminder}" AND userId = {interaction.user.id}""")[0][0]
+        id = Database.select("id", "reminders", f"""WHERE date = "{date_param}" AND reminder = "{self.reminder}" AND userId = {interaction.user.id}""")[0][0]
 
-        if dateParam < (datetime.datetime.now() + datetime.timedelta(days=1)):
-            self.reminderInstance.reminderList.append((id, interaction.user.id, self.reminder, dateParam))
+        if date_param < (datetime.datetime.now() + datetime.timedelta(days=1)):
+            self.reminderInstance.reminderList.append((id, interaction.user.id, self.reminder, date_param))
 
-        embedMessage = discord.Embed(title="Reminder snoozed <:charmanderawr:837344550804127774>", description=self.reminder, color=discord.Color.og_blurple())
-        embedMessage.add_field(name="Scheduled Time", value=dateParam.strftime("%m/%d/%Y at %H:%M"))
-        await interaction.response.edit_message(view=self, embed=embedMessage)
+        embed_message = discord.Embed(title="Reminder snoozed <:charmanderawr:837344550804127774>", description=self.reminder, color=discord.Color.og_blurple())
+        embed_message.add_field(name="Scheduled Time", value=date_param.strftime("%m/%d/%Y at %H:%M"))
+        await interaction.response.edit_message(view=self, embed=embed_message)
 
 class PageButtons(discord.ui.View):
     def __init__(self, total: int, count: int, now: datetime, id: int, pages: dict, embed: discord.Embed):
@@ -221,7 +221,7 @@ class PageButtons(discord.ui.View):
 
         await self.message.edit(view=self)
 
-    def getPage(self):
+    def get_page(self):
         if not self.index in self.pages:
             reminders = Database.select(
                 "reminder, date", "reminders", 
@@ -246,7 +246,7 @@ class PageButtons(discord.ui.View):
         if self.index == 0:
             button.disabled = True
 
-        self.embed.description = self.getPage()
+        self.embed.description = self.get_page()
 
         await self.message.edit(embed=self.embed, view=self)
         await interaction.response.defer()
@@ -263,7 +263,7 @@ class PageButtons(discord.ui.View):
             if self.count * (self.index + 1) >= self.total:
                 next.disabled = True
 
-            self.embed.description = self.getPage()
+            self.embed.description = self.get_page()
 
             await self.message.edit(embed=self.embed, view=self)
             await interaction.response.defer()
@@ -272,10 +272,10 @@ class PageButtons(discord.ui.View):
         self.add_item(next)
 
 class DeleteButton(discord.ui.View):
-    def __init__(self, reminderInstance: Reminders, embedMessage: discord.Embed, id: int):
+    def __init__(self, reminder_instance: Reminders, embed_message: discord.Embed, id: int):
         super().__init__(timeout=60)
-        self.reminderInstance = reminderInstance
-        self.embedMessage = embedMessage
+        self.reminder_instance = reminder_instance
+        self.embed_message = embed_message
         self.id = id
 
     async def on_timeout(self):
@@ -290,10 +290,10 @@ class DeleteButton(discord.ui.View):
 
         Database.delete("reminders", f"WHERE id = {self.id}")
 
-        await self.reminderInstance.remove_from_reminders(self.id)
+        await self.reminder_instance.remove_from_reminders(self.id)
 
-        self.embedMessage.title = "Reminder DELETED <:romani_nervous:746062766825013269>"
-        await interaction.response.edit_message(embed=self.embedMessage, view=self)
+        self.embed_message.title = "Reminder DELETED <:romani_nervous:746062766825013269>"
+        await interaction.response.edit_message(embed=self.embed_message, view=self)
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(Reminders(bot))

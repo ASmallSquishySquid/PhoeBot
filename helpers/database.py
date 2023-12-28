@@ -17,13 +17,13 @@ class Database():
 
         return results
 
-    def insert(tableAndCols: str, values: str, ignore: bool = False) -> None:
+    def insert(table_and_cols: str, values: str, ignore: bool = False) -> None:
         if Database.connection is None:
             Database.connect()
 
         cursor = Database.connection.cursor()
 
-        cursor.execute(f"""INSERT {"OR IGNORE" if ignore else ""} INTO {tableAndCols} VALUES({values});""")
+        cursor.execute(f"""INSERT {"OR IGNORE" if ignore else ""} INTO {table_and_cols} VALUES({values});""")
         cursor.close()
         Database.connection.commit()
 

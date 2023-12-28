@@ -29,13 +29,13 @@ async def on_ready():
         await bot.load_extension("cogs." + cog)
 
 @bot.check
-async def blockUnauthorizedUsers(ctx: discord.ext.commands.Context):
+async def block_unauthorized_users(ctx: discord.ext.commands.Context):
     if ctx.author == bot.user:
         return
 
-    allowed = AuthorizedUsers.isAuthorized(ctx.author.id)
+    allowed = AuthorizedUsers.is_authorized(ctx.author.id)
     if not allowed:
-        await ctx.reply(AuthorizedUsers.unauthorizedMessage)
+        await ctx.reply(AuthorizedUsers.UNAUTHORIZED_MESSAGE)
     return allowed
 
 # Based on https://gist.github.com/EvieePy/7822af90858ef65012ea500bcecf1612

@@ -24,10 +24,10 @@ class TextCommands(commands.Cog):
     )
     @commands.is_owner()
     async def heh(self, ctx: commands.Context):
-        userId = int(os.getenv("BLIST_ID"))
-        josie = self.bot.get_user(userId)
+        user_id = int(os.getenv("BLIST_ID"))
+        josie = self.bot.get_user(user_id)
         if josie is None:
-            josie = await self.bot.fetch_user(userId)
+            josie = await self.bot.fetch_user(user_id)
         await josie.send("Boop <a:mmaPokeAnnoyLove:764772302680227890>")
         await ctx.send("Tactical boop launched <a:mmaDanceGrooveMilk:764678198637101083>")
 
@@ -66,7 +66,7 @@ class TextCommands(commands.Cog):
         name = user.global_name
         if name is None:
             name = user.name
-        AuthorizedUsers.addUser(user.id, name)
+        AuthorizedUsers.add_user(user.id, name)
         await ctx.send("User " + name + " is no longer a stranger <:charmanderawr:837344550804127774>")
 
     @commands.command(
@@ -76,11 +76,11 @@ class TextCommands(commands.Cog):
     @commands.is_owner()
     @commands.guild_only()
     async def unauthorize(self, ctx: commands.Context, user: discord.User = commands.parameter(description="The user to remove authorization from")):
-        if user.id == 274397067177361408:
+        if user.id == int(os.getenv("SQIDJI_ID")):
             await ctx.send("You can't unauthorize yourself!")
             return
 
-        AuthorizedUsers.removeUser(user.id)
+        AuthorizedUsers.remove_user(user.id)
 
         name = user.global_name
         if name is None:

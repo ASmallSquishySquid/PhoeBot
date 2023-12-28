@@ -13,7 +13,7 @@ class Events(commands.Cog):
         if message.author == self.bot.user:
             return
         
-        if not AuthorizedUsers.isAuthorized(message.author.id):
+        if not AuthorizedUsers.is_authorized(message.author.id):
             return
 
         elif message.content.lower().startswith("hi") or message.content.lower().startswith("hello") :
@@ -25,16 +25,16 @@ class Events(commands.Cog):
         if (before.id != int(os.getenv("SQIDJI_ID"))) or datetime.now() > datetime.now().replace(hour=19, minute=0) or datetime.now() < datetime.now().replace(hour=7, minute=0):
             return
         
-        oldPlaying = [game.name for game in before.activities if str(game.type) == "ActivityType.playing"]
-        newPlaying = [game.name for game in after.activities if str(game.type) == "ActivityType.playing" and game.name not in oldPlaying]
+        old_playing = [game.name for game in before.activities if str(game.type) == "ActivityType.playing"]
+        new_playing = [game.name for game in after.activities if str(game.type) == "ActivityType.playing" and game.name not in old_playing]
         
         channel = self.bot.get_channel(int(os.getenv("DUCK_CHANNEL_ID")))
         if channel is None:
             channel = await self.bot.fetch_channel(int(os.getenv("DUCK_CHANNEL_ID")))
 
-        if "Overwatch 2" in newPlaying:
+        if "Overwatch 2" in new_playing:
             await channel.send("<@559828298973184011> want to do some watching over?")
-        if "Valorant" in newPlaying:
+        if "Valorant" in new_playing:
             await channel.send("<@559828298973184011> Val?")
 
 async def setup(bot: commands.Bot):

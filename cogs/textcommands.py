@@ -5,8 +5,6 @@ import os
 
 from discord.ext import commands
 
-from helpers.authorizedusers import AuthorizedUsers
-
 class TextCommands(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
@@ -59,64 +57,11 @@ class TextCommands(commands.Cog):
         await ctx.send("You are not currently listening to anything on Spotify <:charmanderawr:837344550804127774>")
 
     @commands.hybrid_command(
-        help="Authorize a user",
-        hidden=True
-    )
-    @commands.is_owner()
-    @commands.guild_only()
-    async def authorize(self, ctx: commands.Context, user: discord.User = commands.parameter(description="The user being authorized")):
-        name = user.global_name
-        if name is None:
-            name = user.name
-        AuthorizedUsers.add_user(user.id, name)
-        await ctx.send("User " + name + " is no longer a stranger <:charmanderawr:837344550804127774>")
-
-    @commands.hybrid_command(
-        help="Remove authorization from a user",
-        hidden=True
-    )
-    @commands.is_owner()
-    @commands.guild_only()
-    async def unauthorize(self, ctx: commands.Context, user: discord.User = commands.parameter(description="The user to remove authorization from")):
-        if user.id == int(os.getenv("SQIDJI_ID")):
-            await ctx.send("You can't unauthorize yourself!")
-            return
-
-        AuthorizedUsers.remove_user(user.id)
-
-        name = user.global_name
-        if name is None:
-            name = user.name
-        await ctx.send("User " + name + " is dead to me <:charmanderawr:837344550804127774>")
-
-    @commands.hybrid_command(
         help="Get the sauce",
         aliases=["source"]
     )
     async def sauce(self, ctx: commands.Context):
         await ctx.send("https://github.com/ASmallSquishySquid/PhoeBot")
-
-    @commands.hybrid_command(
-        help="Add the bot to your server",
-        hidden=True
-    )
-    @commands.is_owner()
-    async def invite(self, ctx: commands.Context):
-        if ctx.guild is None:
-            await ctx.send(f"https://discord.com/api/oauth2/authorize?client_id={os.getenv('CLIENT_ID')}&permissions=379904&scope=bot")
-        else:
-            await ctx.author.send(f"https://discord.com/api/oauth2/authorize?client_id={os.getenv('CLIENT_ID')}&permissions=379904&scope=bot")
-            await ctx.send("Sent the invite link in your DMs <:charmanderawr:837344550804127774>")
-
-    @commands.hybrid_command(
-        help="Syncs the slash command tree",
-        hidden=True
-    )
-    @commands.is_owner()
-    async def sync(self, ctx: commands.Context):
-        synced = await ctx.bot.tree.sync()
-        synced_names = [command.name for command in synced]
-        await ctx.send(f"Synced {len(synced)} commands to the command tree <:charmanderawr:837344550804127774>.\nCommands: {synced_names}")
     
 async def setup(bot: commands.Bot):
     await bot.add_cog(TextCommands(bot))

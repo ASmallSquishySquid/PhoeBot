@@ -42,7 +42,8 @@ class Reminders(commands.Cog):
             self.reminder_cache = later
 
     @commands.command(
-        help="Set a reminder"
+        help="Set a reminder",
+        aliases=["reminder"]
     )
     async def remind(self, ctx: commands.Context, 
         reminder: str = commands.parameter(description="What do you want to be reminded of?"), *, 

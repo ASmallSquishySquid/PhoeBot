@@ -20,6 +20,7 @@ class TextCommands(commands.Cog):
 
     @commands.command(
         help="Hehehe boop",
+        aliases=["boop"],
         hidden=True
     )
     @commands.is_owner()
@@ -45,7 +46,8 @@ class TextCommands(commands.Cog):
 
     @commands.command(
         help="Gets the link to your currently playing song on Spotify",
-        brief="Spotify now playing"
+        brief="Spotify now playing",
+        aliases=["spotify"]
     )
     @commands.guild_only()
     async def np(self, ctx: commands.Context):
@@ -88,7 +90,8 @@ class TextCommands(commands.Cog):
         await ctx.send("User " + name + " is dead to me <:charmanderawr:837344550804127774>")
 
     @commands.command(
-        help="Get the sauce"
+        help="Get the sauce",
+        aliases=["source"]
     )
     async def sauce(self, ctx: commands.Context):
         await ctx.send("https://github.com/ASmallSquishySquid/PhoeBot")

@@ -18,12 +18,11 @@ class PhoeBot(Bot):
     def __init__(self, command_prefix, intents: discord.Intents, activity):
         super().__init__(command_prefix=command_prefix, intents=intents, activity=activity, owner_id=int(os.getenv("SQIDJI_ID")))
 
-
 bot = PhoeBot(command_prefix="!", intents=discord.Intents.all(), activity=discord.Activity(type=discord.ActivityType.watching, name="you 👀"))
 
 @bot.event
 async def on_ready():
-    print("We have logged in as {0.user}".format(bot), flush=True)
+    print(f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] We have logged in as {bot.user}", flush=True)
     AuthorizedUsers.startup()
     for cog in cogs:
         await bot.load_extension("cogs." + cog)

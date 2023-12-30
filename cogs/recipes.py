@@ -1,14 +1,16 @@
+from typing import List
 import aiohttp
 import discord
 import os
 
+from discord import app_commands
 from discord.ext import commands
 
 class Recipes(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @commands.command(
+    @commands.hybrid_command(
         help="Get some recipes",
         aliases=["recipes", "dinner"]
     )
@@ -27,6 +29,14 @@ class Recipes(commands.Cog):
                     buttons = PageButtons(total, js["hits"], {0: embed_message})
 
                     buttons.message = await ctx.send(embed=embed_message, view=buttons)
+
+    @recipe.autocomplete("search")
+    async def recipe_autocomplete(self, interaction: discord.Interaction, current: str,) -> List[app_commands.Choice[str]]:
+        cuisines = ["Chinese", "Pasta", "Potatoes", "Ground Turkey"]
+        return [
+            app_commands.Choice(name=cuisine, value=cuisine.lower())
+            for cuisine in cuisines if current.lower() in cuisine.lower()
+        ]
 
     def build_recipe_embed(recipe_js, index, total) -> discord.Embed:
         ingredients = "\n".join([ingredient for ingredient in recipe_js["ingredientLines"]])

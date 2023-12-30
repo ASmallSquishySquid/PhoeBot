@@ -1,7 +1,7 @@
-import os
 import aiohttp
 import discord
 import datetime
+import os
 
 from discord.ext import commands
 from discord.ext import tasks

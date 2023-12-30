@@ -1,10 +1,10 @@
-from typing import List
 import aiohttp
 import discord
 import os
 
 from discord import app_commands
 from discord.ext import commands
+from typing import List
 
 class Recipes(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -108,7 +108,6 @@ class PageButtons(discord.ui.View):
         next.callback = next_button
 
         self.add_item(next)
-
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(Recipes(bot))

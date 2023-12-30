@@ -1,11 +1,11 @@
 import asyncio
 import datetime
-from typing import List
 import discord
 
 from discord import app_commands
 from discord.ext import commands
 from discord.ext import tasks
+from typing import List
 
 from helpers.database import Database
 
@@ -128,7 +128,7 @@ class Reminders(commands.Cog):
         buttons.message = await ctx.send(embed=embed_message, view=buttons)
 
     @set.autocomplete("when")
-    async def recipe_autocomplete(self, interaction: discord.Interaction, current: str,) -> List[app_commands.Choice[str]]:
+    async def reminder_autocomplete(self, interaction: discord.Interaction, current: str,) -> List[app_commands.Choice[str]]:
         times = ["10:00", "1d", "1h", "15m"]
         matched_times = [
             app_commands.Choice(name=time, value=time)
@@ -147,7 +147,6 @@ class Reminders(commands.Cog):
         ])
 
         return matched_times
-
 
     @set.error
     async def remind_error(self, ctx, error):
@@ -178,7 +177,12 @@ class Reminders(commands.Cog):
 
         await ctx.send(f"Ok, deleted reminder {id} <:charmanderawr:837344550804127774>")
 
-    async def remove_from_reminders(self, id):
+    async def remove_from_reminders(self, id: int):
+        """Removes the reminder with the provided id from the cache
+
+        Args:
+            id (int): The reminder ID
+        """        
         async with self.lock:
             for i in range(len(self.reminder_cache)):
                 if self.reminder_cache[i][0] == id:

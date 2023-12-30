@@ -1,7 +1,9 @@
 import asyncio
 import datetime
+from typing import List
 import discord
 
+from discord import app_commands
 from discord.ext import commands
 from discord.ext import tasks
 
@@ -124,6 +126,28 @@ class Reminders(commands.Cog):
         embed_message.add_field(name="Scheduled Time", value=date_param.strftime("%m/%d/%Y at %H:%M"))
         buttons = DeleteButton(self, embed_message, id)
         buttons.message = await ctx.send(embed=embed_message, view=buttons)
+
+    @set.autocomplete("when")
+    async def recipe_autocomplete(self, interaction: discord.Interaction, current: str,) -> List[app_commands.Choice[str]]:
+        times = ["10:00", "1d", "1h", "15m"]
+        matched_times = [
+            app_commands.Choice(name=time, value=time)
+            for time in times if current.lower() in time.lower()
+        ]
+
+        days = {
+            "tomorrow": (datetime.datetime.now().replace(hour=10, minute=0) + datetime.timedelta(days=1)), 
+            "tonight": datetime.datetime.now().replace(hour=20, minute=0),
+            "midnight": (datetime.datetime.now().replace(hour=0, minute=0) + datetime.timedelta(days=1)),
+            "noon": (datetime.datetime.now().replace(hour=12, minute=0) + datetime.timedelta(days=(1 if (datetime.datetime.now().hour >= 12) else 0)))
+        }
+        matched_times.extend([
+            app_commands.Choice(name=time, value=days[time].strftime("%m/%d %H:%M"))
+            for time in days if current.lower() in time.lower()
+        ])
+
+        return matched_times
+
 
     @set.error
     async def remind_error(self, ctx, error):

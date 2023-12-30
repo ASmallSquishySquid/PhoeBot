@@ -30,17 +30,11 @@ class TextCommands(commands.Cog):
         await josie.send("Boop <a:mmaPokeAnnoyLove:764772302680227890>")
         await ctx.send("Tactical boop launched <a:mmaDanceGrooveMilk:764678198637101083>")
 
-    @commands.hybrid_command(
-        help="Get a random cat fact",
-        brief="Cat fact"
+    @commands.command(
+        hidden=True
     )
     async def catfact(self, ctx: commands.Context):
-        async with aiohttp.ClientSession() as session:
-            async with session.get("https://meowfacts.herokuapp.com/") as response:
-                await ctx.send("https://http.cat/" + str(response.status))
-                if response.status == 200:
-                    js = await response.json()
-                    await ctx.send(js["data"][0] + " <:lick:764398697596715014>")
+       await ctx.send("This command has been depricated. Please use !fact cat instead <:mmMilkSorry:764772302289109003>")
 
     @commands.hybrid_command(
         help="Gets the link to your currently playing song on Spotify",
@@ -63,5 +57,51 @@ class TextCommands(commands.Cog):
     async def sauce(self, ctx: commands.Context):
         await ctx.send("https://github.com/ASmallSquishySquid/PhoeBot")
     
+    @commands.hybrid_group(
+        help="Get a random fact",
+        fallback="random"
+    )
+    async def fact(self, ctx: commands.Context):
+        async with aiohttp.ClientSession() as session:
+            async with session.get("https://uselessfacts.jsph.pl/api/v2/facts/random") as response:
+                if response.status == 200:
+                    js = await response.json()
+                    await ctx.send(f"{js['text']} <:yes:742975819735105577>")
+
+    @fact.command(
+        help="Get a random cat fact",
+        brief="Cat fact"
+    )
+    async def cat(self, ctx: commands.Context):
+        async with aiohttp.ClientSession() as session:
+            async with session.get("https://meowfacts.herokuapp.com/") as response:
+                await ctx.send(f"https://http.cat/{response.status}")
+                if response.status == 200:
+                    js = await response.json()
+                    await ctx.send(f"{js['data'][0]} <:lick:764398697596715014>")
+
+    @fact.command(
+        help="Get a random dog fact",
+        brief="Dog fact"
+    )
+    async def dog(self, ctx: commands.Context):
+        async with aiohttp.ClientSession() as session:
+            async with session.get("https://dog-api.kinduff.com/api/facts") as response:
+                await ctx.send(f"https://http.dog/{response.status}.jpg")
+                if response.status == 200:
+                    js = await response.json()
+                    await ctx.send(f"{js['facts'][0]} 🐶")
+      
+    @fact.command(
+        help="Get a random number fact",
+        brief="Number fact"
+    )
+    async def number(self, ctx: commands.Context):
+        async with aiohttp.ClientSession() as session:
+            async with session.get("http://numbersapi.com/random/trivia") as response:
+                if response.status == 200:
+                    text = await response.text()
+                    await ctx.send(f"{text} <:yes:742975819735105577>")
+
 async def setup(bot: commands.Bot):
     await bot.add_cog(TextCommands(bot))

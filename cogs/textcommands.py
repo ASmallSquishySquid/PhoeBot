@@ -115,7 +115,8 @@ class TextCommands(commands.Cog):
     @commands.is_owner()
     async def sync(self, ctx: commands.Context):
         synced = await ctx.bot.tree.sync()
-        await ctx.send(f"Synced {len(synced)} commands to the command tree <:charmanderawr:837344550804127774>.\nCommands: {synced}")
+        synced_names = [command.name for command in synced]
+        await ctx.send(f"Synced {len(synced)} commands to the command tree <:charmanderawr:837344550804127774>.\nCommands: {synced_names}")
     
 async def setup(bot: commands.Bot):
     await bot.add_cog(TextCommands(bot))

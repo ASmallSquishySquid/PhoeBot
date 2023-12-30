@@ -116,8 +116,9 @@ class Reminders(commands.Cog):
     async def debug(self, ctx: commands.Context):
         await ctx.send(self.reminder_cache)
 
-    @commands.command(
-        help="Get your future reminders"
+    @commands.hybrid_group(
+        help="Get your future reminders",
+        fallback="get"
     )
     async def reminders(self, ctx: commands.Context, count: int = commands.parameter(default=10, description="Number of reminders per page")):
         now = datetime.datetime.now()

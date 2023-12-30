@@ -44,6 +44,13 @@ class Admin(commands.Cog):
             name = user.name
         await ctx.send(f"User {user.mention} is dead to me <:charmanderawr:837344550804127774>")
 
+    @commands.hybrid_command(
+        help="Get the list of authorized user IDs"
+    )
+    @commands.is_owner()
+    async def users(self, ctx: commands.Context):
+        await ctx.send(AuthorizedUsers.get_user_set(), ephemeral=True)
+
     # Cog commands
 
     @commands.hybrid_command(

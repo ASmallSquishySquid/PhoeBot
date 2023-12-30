@@ -104,6 +104,14 @@ class TextCommands(commands.Cog):
     async def invite(self, ctx: commands.Context):
         await ctx.author.send("https://discord.com/api/oauth2/authorize?client_id=874820032968921209&permissions=379904&scope=bot")
 
+    @commands.command(
+        help="Syncs the slash command tree",
+        hidden=True
+    )
+    @commands.is_owner()
+    async def sync(self, ctx: commands.Context):
+        synced = await ctx.bot.tree.sync()
+        await ctx.send(f"Synced {len(synced)} commands to the command tree <:charmanderawr:837344550804127774>.\nCommands: {synced}")
     
 async def setup(bot: commands.Bot):
     await bot.add_cog(TextCommands(bot))

@@ -18,8 +18,7 @@ class TextCommands(commands.Cog):
 
     @commands.hybrid_command(
         help="Hehehe boop",
-        aliases=["boop"],
-        hidden=True
+        aliases=["boop"]
     )
     @commands.is_owner()
     async def heh(self, ctx: commands.Context):

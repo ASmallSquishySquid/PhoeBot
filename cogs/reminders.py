@@ -41,11 +41,35 @@ class Reminders(commands.Cog):
                     later.append(reminder)
             self.reminder_cache = later
 
-    @commands.command(
+    @commands.hybrid_group(
+        help="Get your future reminders",
+        fallback="get"
+    )
+    async def reminders(self, ctx: commands.Context, count: int = commands.parameter(default=10, description="Number of reminders per page")):
+        now = datetime.datetime.now()
+        total = Database.count("reminders", f"""WHERE userId = {ctx.author.id} AND date > "{now}" """)
+
+        if total == 0:
+            await ctx.send("There are no upcoming reminders <:charmanderawr:837344550804127774>")
+            return
+
+        first = Database.select("id, reminder, date", "reminders", f"""WHERE userId = {ctx.author.id} AND date > "{now}" ORDER BY date LIMIT {count}""")
+
+        display = "\n".join([f'{reminder[0]}: Reminder "{reminder[1]}" set for {reminder[2].strftime("%m/%d/%Y at %H:%M")}' for reminder in first])
+        embed_message = discord.Embed(title="Upcoming reminders <:charmanderawr:837344550804127774>", description=display, color=discord.Color.og_blurple())
+
+        if total <= count:
+            await ctx.send(embed=embed_message)
+            return
+
+        buttons = PageButtons(total, count, now, ctx.author.id, {0: display}, embed_message)
+        buttons.message = await ctx.send(embed=embed_message, view=buttons)
+
+    @reminders.command(
         help="Set a reminder",
         aliases=["reminder"]
     )
-    async def remind(self, ctx: commands.Context, 
+    async def set(self, ctx: commands.Context, 
         reminder: str = commands.parameter(description="What do you want to be reminded of?"), *, 
         args: str = commands.parameter(displayed_name="time", description="When do you want to be reminded?", default="1h")
     ):
@@ -102,45 +126,21 @@ class Reminders(commands.Cog):
         buttons = DeleteButton(self, embed_message, id)
         buttons.message = await ctx.send(embed=embed_message, view=buttons)
 
-    @remind.error
+    @set.error
     async def remind_error(self, ctx, error):
         if isinstance(error, commands.errors.MissingRequiredArgument):
             await ctx.send('The remind command takes in a reminder string and a time. ex: !remind "Send email" 12:00 <:charmanderawr:837344550804127774>')
         else:
             await ctx.send('Please keep the reminder in one string and keep all time components separate. And no AM/PM! <:charmanderawr:837344550804127774>')
 
-    @commands.command(
+    @reminders.command(
         help="Get the contents of the internal reminder list",
         hidden=True
     )
     async def debug(self, ctx: commands.Context):
         await ctx.send(self.reminder_cache)
 
-    @commands.hybrid_group(
-        help="Get your future reminders",
-        fallback="get"
-    )
-    async def reminders(self, ctx: commands.Context, count: int = commands.parameter(default=10, description="Number of reminders per page")):
-        now = datetime.datetime.now()
-        total = Database.count("reminders", f"""WHERE userId = {ctx.author.id} AND date > "{now}" """)
-
-        if total == 0:
-            await ctx.send("There are no upcoming reminders <:charmanderawr:837344550804127774>")
-            return
-
-        first = Database.select("id, reminder, date", "reminders", f"""WHERE userId = {ctx.author.id} AND date > "{now}" ORDER BY date LIMIT {count}""")
-
-        display = "\n".join([f'{reminder[0]}: Reminder "{reminder[1]}" set for {reminder[2].strftime("%m/%d/%Y at %H:%M")}' for reminder in first])
-        embed_message = discord.Embed(title="Upcoming reminders <:charmanderawr:837344550804127774>", description=display, color=discord.Color.og_blurple())
-
-        if total <= count:
-            await ctx.send(embed=embed_message)
-            return
-
-        buttons = PageButtons(total, count, now, ctx.author.id, {0: display}, embed_message)
-        buttons.message = await ctx.send(embed=embed_message, view=buttons)
-
-    @commands.command(
+    @reminders.command(
         help="Delete a reminder"
     )
     async def delete(self, ctx: commands.Context, id: int = commands.parameter(description="The ID of the reminder being deleted")):

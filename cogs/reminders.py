@@ -66,14 +66,13 @@ class Reminders(commands.Cog):
         buttons.message = await ctx.send(embed=embed_message, view=buttons)
 
     @reminders.command(
-        help="Set a reminder",
-        aliases=["reminder"]
+        help="Set a reminder"
     )
     async def set(self, ctx: commands.Context, 
         reminder: str = commands.parameter(description="What do you want to be reminded of?"), *, 
-        args: str = commands.parameter(displayed_name="time", description="When do you want to be reminded?", default="1h")
+        when: str = commands.parameter(displayed_name="time", description="When do you want to be reminded?", default="1h")
     ):
-        time_arg = "".join(args)
+        time_arg = "".join(when)
         date_param = datetime.datetime.now()
 
         components = time_arg.split()

@@ -11,14 +11,14 @@ class TextCommands(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @commands.command(
+    @commands.hybrid_command(
         help="Gets the current date and time",
         brief="Current date/time"
     )
     async def date(self, ctx: commands.Context):
         await ctx.send("Today is " + str(datetime.date.today().strftime('%m/%d/%Y')) + " <:charmanderawr:837344550804127774>")
 
-    @commands.command(
+    @commands.hybrid_command(
         help="Hehehe boop",
         aliases=["boop"],
         hidden=True
@@ -32,7 +32,7 @@ class TextCommands(commands.Cog):
         await josie.send("Boop <a:mmaPokeAnnoyLove:764772302680227890>")
         await ctx.send("Tactical boop launched <a:mmaDanceGrooveMilk:764678198637101083>")
 
-    @commands.command(
+    @commands.hybrid_command(
         help="Get a random cat fact",
         brief="Cat fact"
     )
@@ -44,7 +44,7 @@ class TextCommands(commands.Cog):
                     js = await response.json()
                     await ctx.send(js["data"][0] + " <:lick:764398697596715014>")
 
-    @commands.command(
+    @commands.hybrid_command(
         help="Gets the link to your currently playing song on Spotify",
         brief="Spotify now playing",
         aliases=["spotify"]
@@ -58,7 +58,7 @@ class TextCommands(commands.Cog):
                 return
         await ctx.send("You are not currently listening to anything on Spotify <:charmanderawr:837344550804127774>")
 
-    @commands.command(
+    @commands.hybrid_command(
         help="Authorize a user",
         hidden=True
     )
@@ -71,7 +71,7 @@ class TextCommands(commands.Cog):
         AuthorizedUsers.add_user(user.id, name)
         await ctx.send("User " + name + " is no longer a stranger <:charmanderawr:837344550804127774>")
 
-    @commands.command(
+    @commands.hybrid_command(
         help="Remove authorization from a user",
         hidden=True
     )
@@ -89,14 +89,14 @@ class TextCommands(commands.Cog):
             name = user.name
         await ctx.send("User " + name + " is dead to me <:charmanderawr:837344550804127774>")
 
-    @commands.command(
+    @commands.hybrid_command(
         help="Get the sauce",
         aliases=["source"]
     )
     async def sauce(self, ctx: commands.Context):
         await ctx.send("https://github.com/ASmallSquishySquid/PhoeBot")
 
-    @commands.command(
+    @commands.hybrid_command(
         help="Add the bot to your server",
         hidden=True
     )
@@ -104,7 +104,7 @@ class TextCommands(commands.Cog):
     async def invite(self, ctx: commands.Context):
         await ctx.author.send("https://discord.com/api/oauth2/authorize?client_id=874820032968921209&permissions=379904&scope=bot")
 
-    @commands.command(
+    @commands.hybrid_command(
         help="Syncs the slash command tree",
         hidden=True
     )

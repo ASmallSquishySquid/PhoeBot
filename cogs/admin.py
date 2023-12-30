@@ -5,7 +5,7 @@ import traceback
 
 from discord import app_commands
 from discord.ext import commands
-from typing import List
+from typing import List, Literal
 
 from helpers.authorizedusers import AuthorizedUsers
 
@@ -20,6 +20,7 @@ class Admin(commands.Cog):
     )
     @commands.is_owner()
     @commands.guild_only()
+    @app_commands.default_permissions()
     async def authorize(self, ctx: commands.Context, user: discord.User = commands.parameter(description="The user being authorized")):
         name = user.global_name
         if name is None:
@@ -32,6 +33,7 @@ class Admin(commands.Cog):
     )
     @commands.is_owner()
     @commands.guild_only()
+    @app_commands.default_permissions()
     async def unauthorize(self, ctx: commands.Context, user: discord.User = commands.parameter(description="The user to remove authorization from")):
         if user.id == self.bot.owner_id:
             await ctx.send("You can't unauthorize yourself!")
@@ -48,6 +50,8 @@ class Admin(commands.Cog):
         help="Get the list of authorized user IDs"
     )
     @commands.is_owner()
+    @app_commands.default_permissions()
+    @app_commands.guilds(int(os.getenv("DUCK_SERVER_ID")))
     async def users(self, ctx: commands.Context):
         await ctx.send(AuthorizedUsers.get_user_set(), ephemeral=True)
 
@@ -58,6 +62,8 @@ class Admin(commands.Cog):
         help="Loads a cog"
     )
     @commands.is_owner()
+    @app_commands.default_permissions()
+    @app_commands.guilds(int(os.getenv("DUCK_SERVER_ID")))
     async def load_cog(self, ctx: commands.Context, cog_name: str = commands.parameter(displayed_name="cog", description="The name of the extension to load")):
         await self.bot.load_extension("cogs." + cog_name)
         await ctx.send(f"Loaded {cog_name}")
@@ -67,6 +73,8 @@ class Admin(commands.Cog):
         help="Reloads a cog"
     )
     @commands.is_owner()
+    @app_commands.default_permissions()
+    @app_commands.guilds(int(os.getenv("DUCK_SERVER_ID")))
     async def reload_cog(self, ctx: commands.Context, cog_name: str = commands.parameter(displayed_name="cog", description="The name of the extension to reload")):
         await self.bot.reload_extension("cogs." + cog_name)
         await ctx.send(f"Reloaded {cog_name}")
@@ -104,15 +112,35 @@ class Admin(commands.Cog):
         help="Add the bot to your server"
     )
     @commands.is_owner()
+    @app_commands.default_permissions()
     async def invite(self, ctx: commands.Context):
-        await ctx.send(f"https://discord.com/api/oauth2/authorize?client_id={os.getenv('CLIENT_ID')}&permissions=379904&scope=bot", ephemeral=True)
+        if ctx.guild:
+            await ctx.author.send(f"https://discord.com/api/oauth2/authorize?client_id={os.getenv('CLIENT_ID')}&permissions=379904&scope=bot")
+            await ctx.send("Sent the invite link in DMs", ephemeral=True)
+        else:
+            await ctx.send(f"https://discord.com/api/oauth2/authorize?client_id={os.getenv('CLIENT_ID')}&permissions=379904&scope=bot")
 
     @commands.hybrid_command(
         help="Syncs the slash command tree"
     )
     @commands.is_owner()
-    async def sync(self, ctx: commands.Context):
-        synced = await ctx.bot.tree.sync()
+    @app_commands.default_permissions()
+    @app_commands.guilds(int(os.getenv("DUCK_SERVER_ID")))
+    async def sync(self, ctx: commands.Context, which: str = commands.parameter(default="*", converter=Literal["*", "test", "~"])):
+        test_guild = await commands.GuildConverter().convert(ctx, os.getenv("DUCK_SERVER_ID"))
+
+        if which == "*":
+            #  Sync everything
+            synced = await ctx.bot.tree.sync()
+            synced.extend(await ctx.bot.tree.sync(guild=test_guild))
+        elif which == "test":
+            # Sync everything only to the test guild
+            ctx.bot.tree.copy_global_to(guild=test_guild)
+            synced = await ctx.bot.tree.sync(guild=test_guild)
+        elif which == "~":
+            # Sync the test guild
+            synced = await ctx.bot.tree.sync(guild=test_guild)
+
         synced_names = [command.name for command in synced]
         await ctx.send(f"Synced {len(synced)} commands to the command tree <:charmanderawr:837344550804127774>.\nCommands: {synced_names}", ephemeral=True)
 

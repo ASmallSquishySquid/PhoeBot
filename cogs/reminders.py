@@ -1,6 +1,7 @@
 import asyncio
 import datetime
 import discord
+import os
 
 from discord import app_commands
 from discord.ext import commands
@@ -159,6 +160,8 @@ class Reminders(commands.Cog):
         help="Get the contents of the internal reminder list"
     )
     @commands.is_owner()
+    @app_commands.default_permissions()
+    @app_commands.guilds(int(os.getenv("DUCK_SERVER_ID")))
     async def debug(self, ctx: commands.Context):
         await ctx.send(self.reminder_cache)
 

@@ -28,6 +28,7 @@ class ContextMenus(commands.Cog):
         return interaction.user.id == int(os.getenv("SQIDJI_ID"))
 
     @app_commands.check(is_owner)
+    @app_commands.default_permissions()
     async def authorize_context_menu(self, interaction: discord.Interaction, member: discord.Member) -> None:
         name = member.global_name
         if name is None:
@@ -38,11 +39,12 @@ class ContextMenus(commands.Cog):
         await interaction.response.send_message(f"User {member.mention} is no longer a stranger <:charmanderawr:837344550804127774>")
 
     @app_commands.check(is_owner)
+    @app_commands.default_permissions()
     async def unauthorize_context_menu(self, interaction: discord.Interaction, member: discord.Member) -> None:
         if member.id == self.bot.owner_id:
             await interaction.response.send_message("You can't unauthorize yourself!", ephemeral=True)
             return
-        
+
         AuthorizedUsers.remove_user(member.id)
 
         await interaction.response.send_message(f"User {member.mention} is dead to me <:charmanderawr:837344550804127774>")

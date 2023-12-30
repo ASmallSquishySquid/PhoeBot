@@ -16,8 +16,7 @@ class Admin(commands.Cog):
     # Authorization commands
 
     @commands.hybrid_command(
-        help="Authorize a user",
-        hidden=True
+        help="Authorize a user"
     )
     @commands.is_owner()
     @commands.guild_only()
@@ -29,8 +28,7 @@ class Admin(commands.Cog):
         await ctx.send("User " + name + " is no longer a stranger <:charmanderawr:837344550804127774>")
 
     @commands.hybrid_command(
-        help="Remove authorization from a user",
-        hidden=True
+        help="Remove authorization from a user"
     )
     @commands.is_owner()
     @commands.guild_only()
@@ -50,8 +48,7 @@ class Admin(commands.Cog):
 
     @commands.hybrid_command(
         name="load",
-        help="Loads a cog",
-        hidden=True
+        help="Loads a cog"
     )
     @commands.is_owner()
     async def load_cog(self, ctx: commands.Context, cog_name: str = commands.parameter(displayed_name="cog", description="The name of the extension to load")):
@@ -60,8 +57,7 @@ class Admin(commands.Cog):
 
     @commands.hybrid_command(
         name="reload",
-        help="Reloads a cog",
-        hidden=True
+        help="Reloads a cog"
     )
     @commands.is_owner()
     async def reload_cog(self, ctx: commands.Context, cog_name: str = commands.parameter(displayed_name="cog", description="The name of the extension to reload")):
@@ -98,17 +94,14 @@ class Admin(commands.Cog):
     # Miscellaneous commands
 
     @commands.hybrid_command(
-        help="Add the bot to your server",
-        hidden=True
+        help="Add the bot to your server"
     )
     @commands.is_owner()
     async def invite(self, ctx: commands.Context):
-        if ctx.guild is None:
-            await ctx.send(f"https://discord.com/api/oauth2/authorize?client_id={os.getenv('CLIENT_ID')}&permissions=379904&scope=bot", ephemeral=True)
+        await ctx.send(f"https://discord.com/api/oauth2/authorize?client_id={os.getenv('CLIENT_ID')}&permissions=379904&scope=bot", ephemeral=True)
 
     @commands.hybrid_command(
-        help="Syncs the slash command tree",
-        hidden=True
+        help="Syncs the slash command tree"
     )
     @commands.is_owner()
     async def sync(self, ctx: commands.Context):

@@ -25,7 +25,7 @@ class Admin(commands.Cog):
         if name is None:
             name = user.name
         AuthorizedUsers.add_user(user.id, name)
-        await ctx.send("User " + name + " is no longer a stranger <:charmanderawr:837344550804127774>")
+        await ctx.send(f"User {user.mention} is no longer a stranger <:charmanderawr:837344550804127774>")
 
     @commands.hybrid_command(
         help="Remove authorization from a user"
@@ -33,7 +33,7 @@ class Admin(commands.Cog):
     @commands.is_owner()
     @commands.guild_only()
     async def unauthorize(self, ctx: commands.Context, user: discord.User = commands.parameter(description="The user to remove authorization from")):
-        if user.id == int(os.getenv("SQIDJI_ID")):
+        if user.id == self.bot.owner_id:
             await ctx.send("You can't unauthorize yourself!")
             return
 
@@ -42,7 +42,7 @@ class Admin(commands.Cog):
         name = user.global_name
         if name is None:
             name = user.name
-        await ctx.send("User " + name + " is dead to me <:charmanderawr:837344550804127774>")
+        await ctx.send(f"User {user.mention} is dead to me <:charmanderawr:837344550804127774>")
 
     # Cog commands
 
@@ -67,7 +67,7 @@ class Admin(commands.Cog):
     @load_cog.autocomplete("cog_name")
     @reload_cog.autocomplete("cog_name")
     async def reminder_autocomplete(self, interaction: discord.Interaction, current: str,) -> List[app_commands.Choice[str]]:
-        cogs = ["textcommands", "loops", "events", "reminders", "recipes"]
+        cogs = ["contextmenus", "textcommands", "loops", "events", "reminders", "recipes"]
         return [
             app_commands.Choice(name=cog, value=cog)
             for cog in cogs if current.lower() in cog.lower()

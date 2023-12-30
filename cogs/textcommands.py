@@ -102,7 +102,11 @@ class TextCommands(commands.Cog):
     )
     @commands.is_owner()
     async def invite(self, ctx: commands.Context):
-        await ctx.author.send("https://discord.com/api/oauth2/authorize?client_id=874820032968921209&permissions=379904&scope=bot")
+        if ctx.guild is None:
+            await ctx.send(f"https://discord.com/api/oauth2/authorize?client_id={os.getenv('CLIENT_ID')}&permissions=379904&scope=bot")
+        else:
+            await ctx.author.send(f"https://discord.com/api/oauth2/authorize?client_id={os.getenv('CLIENT_ID')}&permissions=379904&scope=bot")
+            await ctx.send("Sent the invite link in your DMs <:charmanderawr:837344550804127774>")
 
     @commands.hybrid_command(
         help="Syncs the slash command tree",

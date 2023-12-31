@@ -21,6 +21,14 @@ class Loops(commands.Cog):
         else:
             self.drink_water.start()
 
+    def cog_unload(self):
+        self.bedtime.cancel()
+        self.morning.cancel()
+        self.apod.cancel()
+        self.daily_good_news.cancel()
+        self.sleepy_time.cancel()
+        self.drink_water.cancel()
+
     @tasks.loop(minutes=15)
     async def sleepy_time(self):
         guild_id = int(os.getenv("DUCK_SERVER_ID"))

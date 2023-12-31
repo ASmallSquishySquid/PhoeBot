@@ -17,6 +17,10 @@ class Reminders(commands.Cog):
         self.lock = asyncio.Lock()
         self.get_reminders.start()
 
+    def cog_unload(self):
+        self.get_reminders.cancel()
+        self.send_reminders.cancel()
+
     # every day, on startup time
     @tasks.loop(hours=24)
     async def get_reminders(self):

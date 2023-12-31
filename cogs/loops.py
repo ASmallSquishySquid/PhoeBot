@@ -1,7 +1,9 @@
 import aiohttp
 import discord
 import datetime
+import feedparser
 import os
+import random
 
 from discord.ext import commands
 from discord.ext import tasks
@@ -12,6 +14,7 @@ class Loops(commands.Cog):
         self.bedtime.start()
         self.morning.start()
         self.apod.start()
+        self.daily_good_news.start()
 
         if not (datetime.datetime.now() > datetime.datetime.now().replace(hour=9, minute=0, second=0) and datetime.datetime.now() < datetime.datetime.now().replace(hour=23, minute=30, second=0)):
             self.sleepy_time.start()
@@ -81,6 +84,39 @@ class Loops(commands.Cog):
                         sqidji = await self.bot.fetch_user(user_id)
 
                     await sqidji.send(embed=embed_message)
+
+    # 10:00 AM
+    @tasks.loop(time=datetime.time(hour=18, minute=0))
+    async def daily_good_news(self):
+        base_url = "https://www.goodnewsnetwork.org/category/{}/feed/"
+        feeds = ["USA", "Science", "Animals"]
+        indices = random.sample(range(50), 3)
+        stories = {}
+
+        async with aiohttp.ClientSession() as session:
+            for feed in feeds:
+                async with session.get(base_url.format(feed.lower())) as response:
+                    if response.status == 200:
+                        text = await response.text()
+                        response_feed = feedparser.parse(text)
+                        stories[feed] = [(response_feed.entries[i].title, response_feed.entries[i].link) for i in indices]
+
+        embed_message = discord.Embed(title="Your daily good news <:cutesmile:772176440330027038>", color=discord.Color.og_blurple(), timestamp=datetime.datetime.now())
+        embed_message.set_author(
+            name="Good News Network", 
+            url="https://www.goodnewsnetwork.org/", 
+            icon_url="https://www.goodnewsnetwork.org/wp-content/uploads/2021/01/cropped-GNN-Logo-Circles-2017-1-32x32.png"
+        )
+        for section in stories:
+            formatted = "\n\n".join([f"[{story[0]}]({story[1]})" for story in stories[section]])
+            embed_message.add_field(name=f"__{section}__", value=formatted, inline=False)
+
+        user_id = int(os.getenv("SQIDJI_ID"))
+        sqidji = self.bot.get_user(user_id)
+        if sqidji is None:
+            sqidji = await self.bot.fetch_user(user_id)
+
+        await sqidji.send(embed=embed_message)
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(Loops(bot))

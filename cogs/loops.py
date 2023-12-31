@@ -84,7 +84,13 @@ class Loops(commands.Cog):
                     if js["media_type"] == "image":
                         embed_message.set_image(url=js["url"])
                     elif js["media_type"] == "video":
-                        embed_message.set_image(url=js["thumbnail_url"])
+                        if "thumbnail_url" in js:
+                            embed_message.set_image(url=js["thumbnail_url"])
+                        else:
+                            video_id = "mPcoBfQ5j-k"
+                            if "youtu" in js["url"]:
+                                video_id = js["url"].split("/")[-1].split("?")[0]
+                            embed_message.set_image(url=f"https://img.youtube.com/vi/{video_id}/maxresdefault.jpg")
 
                     user_id = int(os.getenv("SQIDJI_ID"))
                     sqidji = self.bot.get_user(user_id)

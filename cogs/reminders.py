@@ -142,7 +142,7 @@ class Reminders(commands.Cog):
 
         days = {
             "tomorrow": (datetime.datetime.now().replace(hour=10, minute=0) + datetime.timedelta(days=1)), 
-            "tonight": datetime.datetime.now().replace(hour=20, minute=0),
+            "tonight": (datetime.datetime.now().replace(hour=20, minute=0) + datetime.timedelta(days=(1 if (datetime.datetime.now().hour >= 20) else 0))),
             "midnight": (datetime.datetime.now().replace(hour=0, minute=0) + datetime.timedelta(days=1)),
             "noon": (datetime.datetime.now().replace(hour=12, minute=0) + datetime.timedelta(days=(1 if (datetime.datetime.now().hour >= 12) else 0)))
         }

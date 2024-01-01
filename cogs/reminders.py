@@ -53,6 +53,9 @@ class Reminders(commands.Cog):
         help="Get your future reminders",
         fallback="get"
     )
+    @app_commands.describe(
+        count="Number of reminders per page"
+    )
     async def reminders(self, ctx: commands.Context, count: int = commands.parameter(default=10, description="Number of reminders per page")):
         now = datetime.datetime.now()
         total = Database.count("reminders", f"""WHERE userId = {ctx.author.id} AND date > "{now}" """)
@@ -75,6 +78,10 @@ class Reminders(commands.Cog):
 
     @reminders.command(
         help="Set a reminder"
+    )
+    @app_commands.describe(
+        reminder="What do you want to be reminded of?",
+        when="When do you want to be reminded?"
     )
     async def set(self, ctx: commands.Context, 
         reminder: str = commands.parameter(description="What do you want to be reminded of?"), *, 
@@ -172,6 +179,9 @@ class Reminders(commands.Cog):
 
     @reminders.command(
         help="Delete a reminder"
+    )
+    @app_commands.describe(
+        id="The ID of the reminder being deleted"
     )
     async def delete(self, ctx: commands.Context, id: int = commands.parameter(description="The ID of the reminder being deleted")):
         reminders = Database.select("*", "reminders", f"WHERE id = {id} and userId = {ctx.author.id}")

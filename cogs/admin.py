@@ -20,6 +20,9 @@ class Admin(commands.Cog):
     )
     @commands.is_owner()
     @commands.guild_only()
+    @app_commands.describe(
+        user="The user being authorized"
+    )
     @app_commands.default_permissions()
     async def authorize(self, ctx: commands.Context, user: discord.User = commands.parameter(description="The user being authorized")):
         name = user.global_name
@@ -33,6 +36,9 @@ class Admin(commands.Cog):
     )
     @commands.is_owner()
     @commands.guild_only()
+    @app_commands.describe(
+        user="The user to remove authorization from"
+    )
     @app_commands.default_permissions()
     async def unauthorize(self, ctx: commands.Context, user: discord.User = commands.parameter(description="The user to remove authorization from")):
         if user.id == self.bot.owner_id:
@@ -62,6 +68,9 @@ class Admin(commands.Cog):
         help="Loads a cog"
     )
     @commands.is_owner()
+    @app_commands.describe(
+        cog_name="The name of the extension to load"
+    )
     @app_commands.default_permissions()
     @app_commands.guilds(int(os.getenv("DUCK_SERVER_ID")))
     async def load_cog(self, ctx: commands.Context, cog_name: str = commands.parameter(displayed_name="cog", description="The name of the extension to load")):
@@ -73,6 +82,9 @@ class Admin(commands.Cog):
         help="Reloads a cog"
     )
     @commands.is_owner()
+    @app_commands.describe(
+        cog_name="The name of the extension to reload"
+    )
     @app_commands.default_permissions()
     @app_commands.guilds(int(os.getenv("DUCK_SERVER_ID")))
     async def reload_cog(self, ctx: commands.Context, cog_name: str = commands.parameter(displayed_name="cog", description="The name of the extension to reload")):
@@ -81,7 +93,7 @@ class Admin(commands.Cog):
 
     @load_cog.autocomplete("cog_name")
     @reload_cog.autocomplete("cog_name")
-    async def reminder_autocomplete(self, interaction: discord.Interaction, current: str,) -> List[app_commands.Choice[str]]:
+    async def cogs_autocomplete(self, interaction: discord.Interaction, current: str,) -> List[app_commands.Choice[str]]:
         cogs = ["contextmenus", "crochet", "textcommands", "loops", "events", "reminders", "recipes"]
         return [
             app_commands.Choice(name=cog, value=cog)
@@ -124,6 +136,9 @@ class Admin(commands.Cog):
         help="Syncs the slash command tree"
     )
     @commands.is_owner()
+    @app_commands.describe(
+        which="Which tree do you want to sync?"
+    )
     @app_commands.default_permissions()
     @app_commands.guilds(int(os.getenv("DUCK_SERVER_ID")))
     async def sync(self, ctx: commands.Context, which: str = commands.parameter(default="*", converter=Literal["*", "test", "~"])):

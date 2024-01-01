@@ -2,6 +2,7 @@ import aiohttp
 import discord
 import os
 
+from discord import app_commands
 from discord.ext import commands
 from helpers.pagebuttons import PageButtons
 from typing import Optional
@@ -13,6 +14,10 @@ class Crochet(commands.Cog):
 
     @commands.hybrid_command(
         help="Get some crochet patterns"
+    )
+    @app_commands.describe(
+        free="Only show free patterns",
+        search="The search query"
     )
     async def pattern(self, ctx: commands.Context, free: Optional[bool] = commands.parameter(default=True, description="Only show free patterns"), *, search: str = commands.parameter(description="The search query")):
         username = os.getenv("RAVELRY_USER")

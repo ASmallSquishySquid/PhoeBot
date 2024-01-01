@@ -15,6 +15,9 @@ class Recipes(commands.Cog):
         help="Get some recipes",
         aliases=["recipes", "dinner"]
     )
+    @app_commands.describe(
+        search="The search query"
+    )
     async def recipe(self, ctx: commands.Context, *, search: str = commands.parameter(default="dinner", description="The search query")):
         id = os.getenv("EDAMAM_ID")
         key = os.getenv("EDAMAM_KEY")

@@ -12,7 +12,7 @@ from helpers.authorizedusers import AuthorizedUsers
 sys.stdout = open("../phoebot_logs/{}.log".format(datetime.datetime.now().strftime("%m:%d:%Y-%H:%M")), 'w')
 sys.stderr = sys.stdout
 
-cogs = ["admin", "contextmenus", "textcommands", "loops", "events", "reminders", "recipes"]
+cogs = ["admin", "contextmenus", "crochet", "textcommands", "loops", "events", "reminders", "recipes"]
 
 class PhoeBot(Bot):
     def __init__(self, command_prefix, intents: discord.Intents, activity):

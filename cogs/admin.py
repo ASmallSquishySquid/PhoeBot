@@ -82,7 +82,7 @@ class Admin(commands.Cog):
     @load_cog.autocomplete("cog_name")
     @reload_cog.autocomplete("cog_name")
     async def reminder_autocomplete(self, interaction: discord.Interaction, current: str,) -> List[app_commands.Choice[str]]:
-        cogs = ["contextmenus", "textcommands", "loops", "events", "reminders", "recipes"]
+        cogs = ["contextmenus", "crochet", "textcommands", "loops", "events", "reminders", "recipes"]
         return [
             app_commands.Choice(name=cog, value=cog)
             for cog in cogs if current.lower() in cog.lower()

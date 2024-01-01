@@ -6,6 +6,7 @@ import os
 from discord import app_commands
 from discord.ext import commands
 from discord.ext import tasks
+from helpers.pagebuttons import PageButtons
 from typing import List
 
 from helpers.database import Database
@@ -60,16 +61,16 @@ class Reminders(commands.Cog):
             await ctx.send("There are no upcoming reminders <:charmanderawr:837344550804127774>")
             return
 
-        first = Database.select("id, reminder, date", "reminders", f"""WHERE userId = {ctx.author.id} AND date > "{now}" ORDER BY date LIMIT {count}""")
-
-        display = "\n".join([f'{reminder[0]}: Reminder "{reminder[1]}" set for {reminder[2].strftime("%m/%d/%Y at %H:%M")}' for reminder in first])
-        embed_message = discord.Embed(title="Upcoming reminders <:charmanderawr:837344550804127774>", description=display, color=discord.Color.og_blurple())
+        embed_message = self.build_reminders_embed(ctx.author.id, now, count, 0, total)
 
         if total <= count:
             await ctx.send(embed=embed_message)
             return
 
-        buttons = PageButtons(total, count, now, ctx.author.id, {0: display}, embed_message)
+        def embed_builder_callback(index: int, total: int) -> discord.Embed:
+            return self.build_reminders_embed(ctx.author.id, now, count, index, total)
+
+        buttons = PageButtons(total, {0: embed_message}, embed_builder_callback, count)
         buttons.message = await ctx.send(embed=embed_message, view=buttons)
 
     @reminders.command(
@@ -196,6 +197,22 @@ class Reminders(commands.Cog):
                     self.reminder_cache.remove(self.reminder_cache[i])
                     break
 
+    def build_reminders_embed(self, userId: int, time_now: datetime.datetime, count: int, index: int, total:int) -> discord.Embed:
+        # Don't want to load math module into memory for one function
+        num_pages = int(total / count) + (1 if total % count != 0 else 0)
+
+        reminder_page = Database.select(
+            "id, reminder, date", "reminders", 
+            f"""WHERE userId = {userId} AND date > "{time_now}" 
+                ORDER BY date 
+                LIMIT {count} OFFSET {index * count}
+            """)
+
+        page = "\n".join([f'{reminder[0]}: Reminder "{reminder[1]}" set for {reminder[2].strftime("%m/%d/%Y at %H:%M")}' for reminder in reminder_page])
+        embed = discord.Embed(title="Upcoming reminders <:charmanderawr:837344550804127774>", description=page, color=discord.Color.og_blurple())
+        embed.set_footer(text=f"Page {index + 1} of {num_pages}")
+
+        return embed
 
 class SnoozeButtons(discord.ui.View):
     def __init__(self, reminder_instance: Reminders, reminder: str):
@@ -237,75 +254,6 @@ class SnoozeButtons(discord.ui.View):
         embed_message = discord.Embed(title="Reminder snoozed <:charmanderawr:837344550804127774>", description=self.reminder, color=discord.Color.og_blurple())
         embed_message.add_field(name="Scheduled Time", value=date_param.strftime("%m/%d/%Y at %H:%M"))
         await interaction.response.edit_message(view=self, embed=embed_message)
-
-class PageButtons(discord.ui.View):
-    def __init__(self, total: int, count: int, now: datetime, id: int, pages: dict, embed: discord.Embed):
-        super().__init__(timeout=60)
-        self.userId = id
-        self.total = total
-        self.count = count
-        self.now = now
-        self.index = 0
-        self.pages = pages
-        self.embed = embed
-        self.message = None
-        self.__add_buttons()
-
-    async def on_timeout(self):
-        for child in self.children:
-            child.disabled = True
-
-        await self.message.edit(view=self)
-
-    def get_page(self):
-        if not self.index in self.pages:
-            reminders = Database.select(
-                "reminder, date", "reminders", 
-                f"""WHERE userId = {self.userId} AND date > "{self.now}" 
-                    ORDER BY date 
-                    LIMIT {self.count} OFFSET {self.index * self.count}
-                """)
-
-            page = "\n".join([f'Reminder "{reminder[0]}" set for {reminder[1].strftime("%m/%d/%Y at %H:%M")}' for reminder in reminders])
-
-            self.pages[self.index] = page
-
-        return self.pages[self.index]
-
-    @discord.ui.button(style=discord.ButtonStyle.red, emoji="⬅️", disabled=True, custom_id="prev")
-    async def prev_button(self, interaction: discord.Interaction, button: discord.ui.Button):
-        self.index -= 1
-
-        for child in self.children:
-            child.disabled = False
-
-        if self.index == 0:
-            button.disabled = True
-
-        self.embed.description = self.get_page()
-
-        await self.message.edit(embed=self.embed, view=self)
-        await interaction.response.defer()
-
-    def __add_buttons(self):
-        next = discord.ui.Button(style=discord.ButtonStyle.green, emoji="➡️", custom_id="next", disabled=(self.total <= self.count))
-
-        async def next_button(interaction: discord.Interaction):
-            self.index += 1
-
-            for child in self.children:
-                child.disabled = False
-
-            if self.count * (self.index + 1) >= self.total:
-                next.disabled = True
-
-            self.embed.description = self.get_page()
-
-            await self.message.edit(embed=self.embed, view=self)
-            await interaction.response.defer()
-        next.callback = next_button
-
-        self.add_item(next)
 
 class DeleteButton(discord.ui.View):
     def __init__(self, reminder_instance: Reminders, embed_message: discord.Embed, id: int):

@@ -3,7 +3,9 @@ import discord
 import os
 
 from discord.ext import commands
+from helpers.pagebuttons import PageButtons
 from typing import Optional
+
 
 class Crochet(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -24,14 +26,18 @@ class Crochet(commands.Cog):
 
                     total = min(int(js["paginator"]["page_size"]), int(js["paginator"]["results"]))
                     if total > 0:
-                        embed_message = Crochet.build_pattern_embed(js["patterns"][0], 0, total)
-                        buttons = PageButtons(total, js["patterns"], {0: embed_message})
+                        embed_message = self.build_pattern_embed(js["patterns"][0], 0, total)
+
+                        def embed_builder_callback(index: int, total: int) -> discord.Embed:
+                            return self.build_pattern_embed(js["patterns"][index], index, total)
+
+                        buttons = PageButtons(total, {0: embed_message}, embed_builder_callback)
 
                         buttons.message = await ctx.send(embed=embed_message, view=buttons)
                     else:
                         await ctx.send(f"There are no {'free ' if free else ''}patterns for '{search}'")
 
-    def build_pattern_embed(pattern_js, index, total) -> discord.Embed:
+    def build_pattern_embed(self, pattern_js: dict, index: int, total: int) -> discord.Embed:
         embed_message = discord.Embed(title=pattern_js["name"], url=f"https://www.ravelry.com/patterns/library/{pattern_js['permalink']}", color=discord.Color.from_str("#EE6E62"))
         embed_message.set_author(
             name=pattern_js["designer"]["name"], 
@@ -41,66 +47,6 @@ class Crochet(commands.Cog):
         embed_message.set_footer(text=f"Result {index + 1} of {total}", icon_url="https://cdn.discordapp.com/attachments/1186231213216768060/1191222619454836806/RavelrySecondaryLogo2020-Color.png")
 
         return embed_message
-    
-class PageButtons(discord.ui.View):
-    def __init__(self, total: int, patterns: dict, embeds: dict):
-        super().__init__(timeout=120)
-        self.total = total
-        self.patterns = patterns
-        self.embeds = embeds
-        self.index = 0
-        self.message = None
-        self.__add_buttons()
-
-    async def on_timeout(self):
-        for child in self.children:
-            child.disabled = True
-
-        await self.message.edit(view=self)
-
-    def get_embed(self):
-        if not self.index in self.embeds:
-            embed = Crochet.build_pattern_embed(self.patterns[self.index], self.index, self.total)
-
-            self.embeds[self.index] = embed
-
-        return self.embeds[self.index]
-
-    @discord.ui.button(style=discord.ButtonStyle.red, emoji="⬅️", disabled=True, custom_id="prev")
-    async def prev_button(self, interaction: discord.Interaction, button: discord.ui.Button):
-        self.index -= 1
-
-        for child in self.children:
-            child.disabled = False
-
-        if self.index == 0:
-            button.disabled = True
-
-        embed_message = self.get_embed()
-
-        await self.message.edit(embed=embed_message, view=self)
-        await interaction.response.defer()
-
-    def __add_buttons(self):
-        next = discord.ui.Button(style=discord.ButtonStyle.green, emoji="➡️", custom_id="next", disabled=(self.total == 1))
-
-        async def next_button(interaction: discord.Interaction):
-            self.index += 1
-
-            for child in self.children:
-                child.disabled = False
-
-            if (self.index + 1) == self.total:
-                next.disabled = True
-
-            embed_message = self.get_embed()
-
-            await self.message.edit(embed=embed_message, view=self)
-            await interaction.response.defer()
-
-        next.callback = next_button
-
-        self.add_item(next)
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(Crochet(bot))

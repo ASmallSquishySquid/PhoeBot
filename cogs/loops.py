@@ -79,8 +79,10 @@ class Loops(commands.Cog):
                 if request.status == 200:
                     js = await request.json()
                     embed_message = discord.Embed(title=js["title"], description=js["explanation"], url=js["url"], color=discord.Color.og_blurple())
-                    embed_message.set_author(name="NASA")
-                    embed_message.set_thumbnail(url="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/NASA_logo.svg/110px-NASA_logo.svg.png")
+                    embed_message.set_author(
+                        name="NASA",
+                        url="https://apod.nasa.gov/apod/astropix.html",
+                        icon_url="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/NASA_logo.svg/110px-NASA_logo.svg.png")
                     if js["media_type"] == "image":
                         embed_message.set_image(url=js["url"])
                     elif js["media_type"] == "video":

@@ -1,3 +1,4 @@
+import datetime
 import discord
 import os
 import sys
@@ -103,6 +104,9 @@ class Admin(commands.Cog):
     @load_cog.error
     @reload_cog.error
     async def cog_error(self, ctx, error):
+        if isinstance(error, commands.CommandInvokeError):
+            error = error.original
+
         if isinstance(error, commands.ExtensionAlreadyLoaded):
             await ctx.reply(f"{error.name} is already loaded! {constants.DEFAULT_EMOTE}")
         elif isinstance(error, commands.ExtensionNotFound):
@@ -113,10 +117,10 @@ class Admin(commands.Cog):
             await ctx.reply(f"{error.name} is missing the setup() function {constants.DEFAULT_EMOTE}")
         elif isinstance(error, commands.ExtensionNotLoaded):
             await ctx.reply(f"{error.name} hasn't been loaded yet! {constants.DEFAULT_EMOTE}")
-        else:
-            print(f"Ignoring exception in command {ctx.command}:", file=sys.stderr)
-            traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
-            sys.stderr.flush()
+
+        print(f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Ignoring exception in command {ctx.command}:", file=sys.stderr)
+        traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
+        sys.stderr.flush()
 
     # Miscellaneous commands
 

@@ -4,6 +4,7 @@ import os
 from discord import app_commands
 from discord.ext import commands
 
+import helpers.constants as constants
 from helpers.authorizedusers import AuthorizedUsers
 
 class ContextMenus(commands.Cog):
@@ -25,7 +26,7 @@ class ContextMenus(commands.Cog):
         self.bot.tree.remove_command(self.unauthorize_ctx_menu.name, type=self.unauthorize_ctx_menu.type)
 
     def is_owner(interaction: discord.Interaction) -> bool:
-        return interaction.user.id == int(os.getenv("SQIDJI_ID"))
+        return interaction.user.id == int(os.getenv(constants.OWNER_ENV))
 
     @app_commands.check(is_owner)
     @app_commands.default_permissions()
@@ -36,7 +37,7 @@ class ContextMenus(commands.Cog):
 
         AuthorizedUsers.add_user(member.id, name)
 
-        await interaction.response.send_message(f"User {member.mention} is no longer a stranger <:charmanderawr:837344550804127774>")
+        await interaction.response.send_message(f"User {member.mention} is no longer a stranger {constants.DEFAULT_EMOTE}")
 
     @app_commands.check(is_owner)
     @app_commands.default_permissions()
@@ -47,7 +48,7 @@ class ContextMenus(commands.Cog):
 
         AuthorizedUsers.remove_user(member.id)
 
-        await interaction.response.send_message(f"User {member.mention} is dead to me <:charmanderawr:837344550804127774>")
+        await interaction.response.send_message(f"User {member.mention} is dead to me {constants.DEFAULT_EMOTE}")
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(ContextMenus(bot))

@@ -7,6 +7,7 @@ from discord import app_commands
 from discord.ext import commands
 from typing import List, Literal
 
+import helpers.constants as constants
 from helpers.authorizedusers import AuthorizedUsers
 
 class Admin(commands.Cog):
@@ -29,7 +30,7 @@ class Admin(commands.Cog):
         if name is None:
             name = user.name
         AuthorizedUsers.add_user(user.id, name)
-        await ctx.send(f"User {user.mention} is no longer a stranger <:charmanderawr:837344550804127774>")
+        await ctx.send(f"User {user.mention} is no longer a stranger {constants.DEFAULT_EMOTE}")
 
     @commands.hybrid_command(
         help="Remove authorization from a user"
@@ -50,14 +51,14 @@ class Admin(commands.Cog):
         name = user.global_name
         if name is None:
             name = user.name
-        await ctx.send(f"User {user.mention} is dead to me <:charmanderawr:837344550804127774>")
+        await ctx.send(f"User {user.mention} is dead to me {constants.DEFAULT_EMOTE}")
 
     @commands.hybrid_command(
         help="Get the list of authorized user IDs"
     )
     @commands.is_owner()
     @app_commands.default_permissions()
-    @app_commands.guilds(int(os.getenv("DUCK_SERVER_ID")))
+    @app_commands.guilds(int(os.getenv(constants.TEST_SERVER_ENV)))
     async def users(self, ctx: commands.Context):
         await ctx.send(AuthorizedUsers.get_user_set(), ephemeral=True)
 
@@ -72,7 +73,7 @@ class Admin(commands.Cog):
         cog_name="The name of the extension to load"
     )
     @app_commands.default_permissions()
-    @app_commands.guilds(int(os.getenv("DUCK_SERVER_ID")))
+    @app_commands.guilds(int(os.getenv(constants.TEST_SERVER_ENV)))
     async def load_cog(self, ctx: commands.Context, cog_name: str = commands.parameter(displayed_name="cog", description="The name of the extension to load")):
         await self.bot.load_extension("cogs." + cog_name)
         await ctx.send(f"Loaded {cog_name}")
@@ -86,7 +87,7 @@ class Admin(commands.Cog):
         cog_name="The name of the extension to reload"
     )
     @app_commands.default_permissions()
-    @app_commands.guilds(int(os.getenv("DUCK_SERVER_ID")))
+    @app_commands.guilds(int(os.getenv(constants.TEST_SERVER_ENV)))
     async def reload_cog(self, ctx: commands.Context, cog_name: str = commands.parameter(displayed_name="cog", description="The name of the extension to reload")):
         await self.bot.reload_extension("cogs." + cog_name)
         await ctx.send(f"Reloaded {cog_name}")
@@ -94,25 +95,24 @@ class Admin(commands.Cog):
     @load_cog.autocomplete("cog_name")
     @reload_cog.autocomplete("cog_name")
     async def cogs_autocomplete(self, interaction: discord.Interaction, current: str,) -> List[app_commands.Choice[str]]:
-        cogs = ["contextmenus", "crochet", "textcommands", "loops", "events", "reminders", "recipes"]
         return [
             app_commands.Choice(name=cog, value=cog)
-            for cog in cogs if current.lower() in cog.lower()
+            for cog in constants.COGS if current.lower() in cog.lower()
         ]
 
     @load_cog.error
     @reload_cog.error
     async def cog_error(self, ctx, error):
         if isinstance(error, commands.ExtensionAlreadyLoaded):
-            await ctx.reply(f"{error.name} is already loaded! <:charmanderawr:837344550804127774>")
+            await ctx.reply(f"{error.name} is already loaded! {constants.DEFAULT_EMOTE}")
         elif isinstance(error, commands.ExtensionNotFound):
-            await ctx.reply(f"Could not find a cog named {error.name} <:charmanderawr:837344550804127774>")
+            await ctx.reply(f"Could not find a cog named {error.name} {constants.DEFAULT_EMOTE}")
         elif isinstance(error, commands.ExtensionFailed):
-            await ctx.reply(f"{error.name} failed. Please check the logs <:charmanderawr:837344550804127774>")
+            await ctx.reply(f"{error.name} failed. Please check the logs {constants.DEFAULT_EMOTE}")
         elif isinstance(error, commands.NoEntryPointError):
-            await ctx.reply(f"{error.name} is missing the setup() function <:charmanderawr:837344550804127774>")
+            await ctx.reply(f"{error.name} is missing the setup() function {constants.DEFAULT_EMOTE}")
         elif isinstance(error, commands.ExtensionNotLoaded):
-            await ctx.reply(f"{error.name} hasn't been loaded yet! <:charmanderawr:837344550804127774>")
+            await ctx.reply(f"{error.name} hasn't been loaded yet! {constants.DEFAULT_EMOTE}")
         else:
             print(f"Ignoring exception in command {ctx.command}:", file=sys.stderr)
             traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
@@ -126,11 +126,12 @@ class Admin(commands.Cog):
     @commands.is_owner()
     @app_commands.default_permissions()
     async def invite(self, ctx: commands.Context):
+        client_id = os.getenv('CLIENT_ID')
         if ctx.guild:
-            await ctx.author.send(f"https://discord.com/api/oauth2/authorize?client_id={os.getenv('CLIENT_ID')}&permissions=379904&scope=bot")
+            await ctx.author.send(f"https://discord.com/api/oauth2/authorize?client_id={client_id}&permissions=379904&scope=bot")
             await ctx.send("Sent the invite link in DMs", ephemeral=True)
         else:
-            await ctx.send(f"https://discord.com/api/oauth2/authorize?client_id={os.getenv('CLIENT_ID')}&permissions=379904&scope=bot")
+            await ctx.send(f"https://discord.com/api/oauth2/authorize?client_id={client_id}&permissions=379904&scope=bot")
 
     @commands.hybrid_command(
         help="Syncs the slash command tree"
@@ -140,9 +141,9 @@ class Admin(commands.Cog):
         which="Which tree do you want to sync?"
     )
     @app_commands.default_permissions()
-    @app_commands.guilds(int(os.getenv("DUCK_SERVER_ID")))
+    @app_commands.guilds(int(os.getenv(constants.TEST_SERVER_ENV)))
     async def sync(self, ctx: commands.Context, which: str = commands.parameter(default="*", converter=Literal["*", "test", "~"])):
-        test_guild = await commands.GuildConverter().convert(ctx, os.getenv("DUCK_SERVER_ID"))
+        test_guild = await commands.GuildConverter().convert(ctx, os.getenv(constants.TEST_SERVER_ENV))
 
         if which == "*":
             #  Sync everything
@@ -157,7 +158,7 @@ class Admin(commands.Cog):
             synced = await ctx.bot.tree.sync(guild=test_guild)
 
         synced_names = [command.name for command in synced]
-        await ctx.send(f"Synced {len(synced)} commands to the command tree <:charmanderawr:837344550804127774>.\nCommands: {synced_names}", ephemeral=True)
+        await ctx.send(f"Synced {len(synced)} commands to the command tree {constants.DEFAULT_EMOTE}.\nCommands: {synced_names}", ephemeral=True)
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(Admin(bot))

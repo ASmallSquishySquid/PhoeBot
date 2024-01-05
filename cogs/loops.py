@@ -8,6 +8,8 @@ import random
 from discord.ext import commands
 from discord.ext import tasks
 
+import helpers.constants as constants
+
 class Loops(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
@@ -31,7 +33,7 @@ class Loops(commands.Cog):
 
     @tasks.loop(minutes=15)
     async def sleepy_time(self):
-        guild_id = int(os.getenv("DUCK_SERVER_ID"))
+        guild_id = int(os.getenv(constants.TEST_SERVER_ENV))
         guild = self.bot.get_guild(guild_id)
         if guild is None:
             guild = await self.bot.fetch_guild(guild_id)
@@ -42,11 +44,11 @@ class Loops(commands.Cog):
             sqidji = await guild.fetch_member(user_id)
 
         if (sqidji.status==discord.Status.online):
-            await sqidji.send("Go to sleep! <:charmanderawr:837344550804127774>")
+            await sqidji.send(f"Go to sleep! {constants.DEFAULT_EMOTE}")
 
     @tasks.loop(minutes=30)
     async def drink_water(self):
-        guild_id = int(os.getenv("DUCK_SERVER_ID"))
+        guild_id = int(os.getenv(constants.TEST_SERVER_ENV))
         guild = self.bot.get_guild(guild_id)
         if guild is None:
             guild = await self.bot.fetch_guild(guild_id)
@@ -57,7 +59,7 @@ class Loops(commands.Cog):
             sqidji = await guild.fetch_member(user_id)
 
         if (sqidji.status==discord.Status.online):
-            await sqidji.send("Drink some water! <:charmanderawr:837344550804127774>")
+            await sqidji.send(f"Drink some water! {constants.DEFAULT_EMOTE}")
 
     # 11:30 PM
     @tasks.loop(time=datetime.time(hour=7, minute=30))

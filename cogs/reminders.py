@@ -3,13 +3,14 @@ import datetime
 import discord
 import os
 
+import helpers.constants as constants
+
 from discord import app_commands
 from discord.ext import commands
-from discord.ext import tasks
-from helpers.pagebuttons import PageButtons
-from typing import List
-
 from helpers.database import Database
+from typing import List
+from helpers.pagebuttons import PageButtons
+from discord.ext import tasks
 
 class Reminders(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -41,7 +42,7 @@ class Reminders(commands.Cog):
                     if requester is None:
                         requester = await self.bot.fetch_user(reminder[1])
 
-                    embed_message = discord.Embed(title="Reminder! <:charmanderawr:837344550804127774>", description=reminder[2], color=discord.Color.og_blurple())
+                    embed_message = discord.Embed(title=f"Reminder! {constants.DEFAULT_EMOTE}", description=reminder[2], color=discord.Color.og_blurple())
                     embed_message.add_field(name="Time", value=reminder[3].strftime("%m/%d/%Y at %H:%M"))
                     buttons = SnoozeButtons(self, reminder[2])
                     buttons.message = await requester.send(embed=embed_message, view=buttons)
@@ -61,7 +62,7 @@ class Reminders(commands.Cog):
         total = Database.count("reminders", f"""WHERE userId = {ctx.author.id} AND date > "{now}" """)
 
         if total == 0:
-            await ctx.send("There are no upcoming reminders <:charmanderawr:837344550804127774>")
+            await ctx.send(f"There are no upcoming reminders {constants.DEFAULT_EMOTE}")
             return
 
         embed_message = self.build_reminders_embed(ctx.author.id, now, count, 0, total)
@@ -135,7 +136,7 @@ class Reminders(commands.Cog):
             async with self.lock:
                 self.reminder_cache.append((id, ctx.author.id, reminder, date_param))
 
-        embed_message = discord.Embed(title="Reminder created <:charmanderawr:837344550804127774>", description=reminder, color=discord.Color.og_blurple())
+        embed_message = discord.Embed(title=f"Reminder created {constants.DEFAULT_EMOTE}", description=reminder, color=discord.Color.og_blurple())
         embed_message.add_field(name="Scheduled Time", value=date_param.strftime("%m/%d/%Y at %H:%M"))
         buttons = DeleteButton(self, embed_message, id)
         buttons.message = await ctx.send(embed=embed_message, view=buttons)
@@ -164,16 +165,16 @@ class Reminders(commands.Cog):
     @set.error
     async def remind_error(self, ctx, error):
         if isinstance(error, commands.errors.MissingRequiredArgument):
-            await ctx.send('The remind command takes in a reminder string and a time. ex: !remind "Send email" 12:00 <:charmanderawr:837344550804127774>')
+            await ctx.send(f'The remind command takes in a reminder string and a time. ex: !remind "Send email" 12:00 {constants.DEFAULT_EMOTE}')
         else:
-            await ctx.send('Please keep the reminder in one string and keep all time components separate. And no AM/PM! <:charmanderawr:837344550804127774>')
+            await ctx.send(f'Please keep the reminder in one string and keep all time components separate. And no AM/PM! {constants.DEFAULT_EMOTE}')
 
     @reminders.command(
         help="Get the contents of the internal reminder list"
     )
     @commands.is_owner()
     @app_commands.default_permissions()
-    @app_commands.guilds(int(os.getenv("DUCK_SERVER_ID")))
+    @app_commands.guilds(int(os.getenv(constants.TEST_SERVER_ENV)))
     async def debug(self, ctx: commands.Context):
         await ctx.send(self.reminder_cache)
 
@@ -186,14 +187,14 @@ class Reminders(commands.Cog):
     async def delete(self, ctx: commands.Context, id: int = commands.parameter(description="The ID of the reminder being deleted")):
         reminders = Database.select("*", "reminders", f"WHERE id = {id} and userId = {ctx.author.id}")
         if len(reminders) == 0:
-            await ctx.send("You can't delete reminders that aren't yours! <:charmanderawr:837344550804127774>")
+            await ctx.send(f"You can't delete reminders that aren't yours! {constants.DEFAULT_EMOTE}")
             return
 
         Database.delete("reminders", f"WHERE id = {id}")
 
         await self.remove_from_reminders(id)
 
-        await ctx.send(f"Ok, deleted reminder {id} <:charmanderawr:837344550804127774>")
+        await ctx.send(f"Ok, deleted reminder {id} {constants.DEFAULT_EMOTE}")
 
     async def remove_from_reminders(self, id: int):
         """Removes the reminder with the provided id from the cache
@@ -219,7 +220,7 @@ class Reminders(commands.Cog):
             """)
 
         page = "\n".join([f'{reminder[0]}: Reminder "{reminder[1]}" set for {reminder[2].strftime("%m/%d/%Y at %H:%M")}' for reminder in reminder_page])
-        embed = discord.Embed(title="Upcoming reminders <:charmanderawr:837344550804127774>", description=page, color=discord.Color.og_blurple())
+        embed = discord.Embed(title=f"Upcoming reminders {constants.DEFAULT_EMOTE}", description=page, color=discord.Color.og_blurple())
         embed.set_footer(text=f"Page {index + 1} of {num_pages}")
 
         return embed
@@ -261,7 +262,7 @@ class SnoozeButtons(discord.ui.View):
         if date_param < (datetime.datetime.now() + datetime.timedelta(days=1)):
             self.reminder_instance.reminder_cache.append((id, interaction.user.id, self.reminder, date_param))
 
-        embed_message = discord.Embed(title="Reminder snoozed <:charmanderawr:837344550804127774>", description=self.reminder, color=discord.Color.og_blurple())
+        embed_message = discord.Embed(title=f"Reminder snoozed {constants.DEFAULT_EMOTE}", description=self.reminder, color=discord.Color.og_blurple())
         embed_message.add_field(name="Scheduled Time", value=date_param.strftime("%m/%d/%Y at %H:%M"))
         await interaction.response.edit_message(view=self, embed=embed_message)
 

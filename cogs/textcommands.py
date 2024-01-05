@@ -5,6 +5,8 @@ import os
 
 from discord.ext import commands
 
+import helpers.constants as constants
+
 class TextCommands(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
@@ -14,7 +16,7 @@ class TextCommands(commands.Cog):
         brief="Current date/time"
     )
     async def date(self, ctx: commands.Context):
-        await ctx.send("Today is " + str(datetime.date.today().strftime('%m/%d/%Y')) + " <:charmanderawr:837344550804127774>")
+        await ctx.send(f"Today is {str(datetime.date.today().strftime('%m/%d/%Y'))} {constants.DEFAULT_EMOTE}")
 
     @commands.hybrid_command(
         help="Hehehe boop",
@@ -47,7 +49,7 @@ class TextCommands(commands.Cog):
             if isinstance(activity, discord.Spotify):
                 await ctx.send("https://open.spotify.com/track/" + activity.track_id)
                 return
-        await ctx.send("You are not currently listening to anything on Spotify <:charmanderawr:837344550804127774>")
+        await ctx.send(f"You are not currently listening to anything on Spotify {constants.DEFAULT_EMOTE}")
 
     @commands.hybrid_command(
         help="Get the sauce",

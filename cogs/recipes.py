@@ -1,11 +1,12 @@
+import os
+from typing import List
+
 import aiohttp
 import discord
-import os
-
 from discord import app_commands
 from discord.ext import commands
+
 from helpers.pagebuttons import PageButtons
-from typing import List
 
 class Recipes(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -18,12 +19,14 @@ class Recipes(commands.Cog):
     @app_commands.describe(
         search="The search query"
     )
-    async def recipe(self, ctx: commands.Context, *, search: str = commands.parameter(default="dinner", description="The search query")):
-        id = os.getenv("EDAMAM_ID")
-        key = os.getenv("EDAMAM_KEY")
+    async def recipe(self, ctx: commands.Context, *,
+        search: str = commands.parameter(default="dinner", description="The search query")):
+
+        app_id = os.getenv("EDAMAM_ID")
+        app_key = os.getenv("EDAMAM_KEY")
 
         async with aiohttp.ClientSession() as session:
-            async with session.get(f"https://api.edamam.com/api/recipes/v2/?type=public&q={search}&app_id={id}&app_key={key}&random=true&field=label&field=image&field=source&field=url&field=ingredientLines&field=totalTime") as response:
+            async with session.get(f"https://api.edamam.com/api/recipes/v2/?type=public&q={search}&app_id={app_id}&app_key={app_key}&random=true&field=label&field=image&field=source&field=url&field=ingredientLines&field=totalTime") as response:
                 if response.status == 200:
                     js = await response.json()
 
@@ -38,7 +41,8 @@ class Recipes(commands.Cog):
                     buttons.message = await ctx.send(embed=embed_message, view=buttons)
 
     @recipe.autocomplete("search")
-    async def recipe_autocomplete(self, interaction: discord.Interaction, current: str,) -> List[app_commands.Choice[str]]:
+    async def recipe_autocomplete(
+        self, interaction: discord.Interaction, current: str,) -> List[app_commands.Choice[str]]:
         cuisines = ["Chinese", "Pasta", "Potatoes", "Ground Turkey"]
         return [
             app_commands.Choice(name=cuisine, value=cuisine.lower())
@@ -46,12 +50,18 @@ class Recipes(commands.Cog):
         ]
 
     def build_recipe_embed(self, recipe_js: dict, index: int, total: int) -> discord.Embed:
-        ingredients = "\n".join([ingredient for ingredient in recipe_js["ingredientLines"]])
-        embed_message = discord.Embed(title=recipe_js["label"], url=recipe_js["url"], color=discord.Color.green())
+        ingredients = "\n".join(list(recipe_js["ingredientLines"]))
+        embed_message = discord.Embed(
+            title=recipe_js["label"],
+            url=recipe_js["url"],
+            color=discord.Color.green())
         embed_message.set_author(name=recipe_js["source"])
         embed_message.set_image(url=recipe_js["image"])
         embed_message.set_footer(text=f"Result {index + 1} of {total}")
-        embed_message.add_field(name="Cook time", value=f'{int(recipe_js["totalTime"])} minutes', inline=False)
+        embed_message.add_field(
+            name="Cook time",
+            value=f'{int(recipe_js["totalTime"])} minutes',
+            inline=False)
         embed_message.add_field(name="Ingredients", value=ingredients, inline=False)
 
         return embed_message

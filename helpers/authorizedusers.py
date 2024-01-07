@@ -4,52 +4,57 @@ class AuthorizedUsers():
     users = set()
     UNAUTHORIZED_MESSAGE = "Sorry, I don't talk to strangers <:mmSweatUhhMocha:764772302403272704>"
 
-    def startup():
+    @classmethod
+    def startup(cls):
         """Builds the authorized user cache"""
-        userIds = Database.select("id", "users")
-        for userId in userIds:
-            AuthorizedUsers.users.add(userId[0])
+        user_ids = Database.select("id", "users")
+        for user_id in user_ids:
+            AuthorizedUsers.users.add(user_id[0])
 
-    def get_user_set() -> set:
+    @classmethod
+    def get_user_set(cls) -> set:
         """Get the authorized users in the cache
 
         Returns:
             set: The set of user IDs
         """
-        return AuthorizedUsers.users
+        return cls.users
 
-    def add_user(userId: int, username: str) -> None:
+    @classmethod
+    def add_user(cls, user_id: int, username: str) -> None:
         """Add a user to the authorized users list
 
         Args:
-            userId (int): The user ID
+            user_id (int): The user ID
             username (str): A recognizable username
         """
-        if userId in AuthorizedUsers.users:
+        if user_id in cls.users:
             return
 
-        AuthorizedUsers.users.add(userId)
-        Database.insert("users", f"""{userId}, "{username}" """, True)
-    
-    def remove_user(userId: int):
+        cls.users.add(user_id)
+        Database.insert("users", f"""{user_id}, "{username}" """, True)
+
+    @classmethod
+    def remove_user(cls, user_id: int):
         """Removes a user from the authorized users list
 
         Args:
-            userId (int): the user ID
+            user_id (int): the user ID
         """
-        if not userId in AuthorizedUsers.users:
+        if not user_id in cls.users:
             return
-        
-        AuthorizedUsers.users.remove(userId)
-        Database.delete("users", f"WHERE id={userId}")
 
-    def is_authorized(userId: int) -> bool:
+        cls.users.remove(user_id)
+        Database.delete("users", f"WHERE id={user_id}")
+
+    @classmethod
+    def is_authorized(cls, user_id: int) -> bool:
         """Checks if a user is authorized
 
         Args:
-            userId (int): The user ID
+            user_id (int): The user ID
 
         Returns:
             bool: `True` if the user is authorized, `False` otherwise
         """
-        return userId in AuthorizedUsers.users
+        return user_id in cls.users

@@ -4,7 +4,8 @@ import sqlite3
 class Database():
     connection = None
 
-    def select(columns: str, table: str, filters: str = "") -> list:
+    @classmethod
+    def select(cls, columns: str, table: str, filters: str = "") -> list:
         """Performs a SELECT query in the phoebot database.
 
         Args:
@@ -15,10 +16,10 @@ class Database():
         Returns:
             list: The results
         """
-        if Database.connection is None:
-            Database.connect()
+        if cls.connection is None:
+            cls.connect()
 
-        cursor = Database.connection.cursor()
+        cursor = cls.connection.cursor()
         cursor.execute(f"""SELECT {columns} FROM {table} {filters};""")
 
         results = list(cursor.fetchall())
@@ -27,7 +28,8 @@ class Database():
 
         return results
 
-    def insert(table_and_cols: str, values: str, ignore: bool = False) -> None:
+    @classmethod
+    def insert(cls, table_and_cols: str, values: str, ignore: bool = False) -> None:
         """Performs an INSERT query in the phoebot database.
 
         Args:
@@ -35,31 +37,34 @@ class Database():
             values (str): The values to insert
             ignore (bool, optional): Flag to ignore duplicates. Defaults to False.
         """
-        if Database.connection is None:
-            Database.connect()
+        if cls.connection is None:
+            cls.connect()
 
-        cursor = Database.connection.cursor()
+        cursor = cls.connection.cursor()
 
-        cursor.execute(f"""INSERT {"OR IGNORE" if ignore else ""} INTO {table_and_cols} VALUES({values});""")
+        cursor.execute(
+            f"""INSERT {"OR IGNORE" if ignore else ""} INTO {table_and_cols} VALUES({values});""")
         cursor.close()
-        Database.connection.commit()
+        cls.connection.commit()
 
-    def delete(table: str, filters: str = "") -> None:
+    @classmethod
+    def delete(cls, table: str, filters: str = "") -> None:
         """Performs a DELETE query in the phoebot database.
 
         Args:
             table (str): The table to use
             filters (str, optional): The filters to use. Defaults to "".
         """
-        if Database.connection is None:
-            Database.connect()
+        if cls.connection is None:
+            cls.connect()
 
         cursor = Database.connection.cursor()
         cursor.execute(f"DELETE FROM {table} {filters};")
         cursor.close()
-        Database.connection.commit()
+        cls.connection.commit()
 
-    def count(table: str, filters: str = "") -> int:
+    @classmethod
+    def count(cls, table: str, filters: str = "") -> int:
         """Performs a COUNT query in the phoebot database.
 
         Args:
@@ -69,10 +74,10 @@ class Database():
         Returns:
             int: The resulting count
         """
-        if Database.connection is None:
-            Database.connect()
+        if cls.connection is None:
+            cls.connect()
 
-        cursor = Database.connection.cursor()
+        cursor = cls.connection.cursor()
         cursor.execute(f"SELECT COUNT(*) FROM {table} {filters};")
 
         count = cursor.fetchone()[0]
@@ -80,8 +85,9 @@ class Database():
         cursor.close()
 
         return count
-    
-    def query(query: str) -> list:
+
+    @classmethod
+    def query(cls, query: str) -> list:
         """Performs a query in the phoebot database.
 
         Args:
@@ -90,19 +96,22 @@ class Database():
         Returns:
             list: The results
         """
-        if Database.connection is None:
-            Database.connect()
+        if cls.connection is None:
+            cls.connect()
 
-        cursor = Database.connection.cursor()
+        cursor = cls.connection.cursor()
         cursor.execute(query)
         result = list(cursor.fetchall())
         cursor.close()
-        Database.connection.commit()
+        cls.connection.commit()
 
         return result
 
-    def connect() -> None:
+    @classmethod
+    def connect(cls) -> None:
         """Connect to the phoebot database"""
         package_dir = os.path.abspath(os.path.dirname(__file__))
         database_path = os.path.join(package_dir, "..", "..", "phoebot.db")
-        Database.connection = sqlite3.connect(database_path, detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
+        cls.connection = sqlite3.connect(
+            database=database_path,
+            detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)

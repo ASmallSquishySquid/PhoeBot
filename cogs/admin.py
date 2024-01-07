@@ -1,14 +1,14 @@
 import datetime
-import discord
 import os
 import sys
 import traceback
-
-from discord import app_commands
-from discord.ext import commands
 from typing import List, Literal
 
-import helpers.constants as constants
+import discord
+from discord import app_commands
+from discord.ext import commands
+
+from helpers import constants
 from helpers.authorizedusers import AuthorizedUsers
 
 class Admin(commands.Cog):
@@ -26,7 +26,9 @@ class Admin(commands.Cog):
         user="The user being authorized"
     )
     @app_commands.default_permissions()
-    async def authorize(self, ctx: commands.Context, user: discord.User = commands.parameter(description="The user being authorized")):
+    async def authorize(self, ctx: commands.Context,
+        user: discord.User = commands.parameter(description="The user being authorized")):
+
         name = user.global_name
         if name is None:
             name = user.name
@@ -42,7 +44,9 @@ class Admin(commands.Cog):
         user="The user to remove authorization from"
     )
     @app_commands.default_permissions()
-    async def unauthorize(self, ctx: commands.Context, user: discord.User = commands.parameter(description="The user to remove authorization from")):
+    async def unauthorize(self, ctx: commands.Context,
+        user: discord.User = commands.parameter(description="The user to remove authorization from")):
+
         if user.id == self.bot.owner_id:
             await ctx.send("You can't unauthorize yourself!")
             return
@@ -75,7 +79,11 @@ class Admin(commands.Cog):
     )
     @app_commands.default_permissions()
     @app_commands.guilds(int(os.getenv(constants.TEST_SERVER_ENV)))
-    async def load_cog(self, ctx: commands.Context, cog_name: str = commands.parameter(displayed_name="cog", description="The name of the extension to load")):
+    async def load_cog(self, ctx: commands.Context,
+        cog_name: str = commands.parameter(
+            displayed_name="cog",
+            description="The name of the extension to load")):
+
         await self.bot.load_extension("cogs." + cog_name)
         await ctx.send(f"Loaded {cog_name}")
 
@@ -89,13 +97,19 @@ class Admin(commands.Cog):
     )
     @app_commands.default_permissions()
     @app_commands.guilds(int(os.getenv(constants.TEST_SERVER_ENV)))
-    async def reload_cog(self, ctx: commands.Context, cog_name: str = commands.parameter(displayed_name="cog", description="The name of the extension to reload")):
+    async def reload_cog(self, ctx: commands.Context,
+        cog_name: str = commands.parameter(
+            displayed_name="cog",
+            description="The name of the extension to reload")):
+
         await self.bot.reload_extension("cogs." + cog_name)
         await ctx.send(f"Reloaded {cog_name}")
 
     @load_cog.autocomplete("cog_name")
     @reload_cog.autocomplete("cog_name")
-    async def cogs_autocomplete(self, interaction: discord.Interaction, current: str,) -> List[app_commands.Choice[str]]:
+    async def cogs_autocomplete(self, interaction: discord.Interaction,
+        current: str,) -> List[app_commands.Choice[str]]:
+
         return [
             app_commands.Choice(name=cog, value=cog)
             for cog in constants.COGS if current.lower() in cog.lower()
@@ -118,7 +132,9 @@ class Admin(commands.Cog):
         elif isinstance(error, commands.ExtensionNotLoaded):
             await ctx.reply(f"{error.name} hasn't been loaded yet! {constants.DEFAULT_EMOTE}")
 
-        print(f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Ignoring exception in command {ctx.command}:", file=sys.stderr)
+        print(
+            f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Ignoring exception in command {ctx.command}:",
+            file=sys.stderr)
         traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
         sys.stderr.flush()
 
@@ -146,8 +162,11 @@ class Admin(commands.Cog):
     )
     @app_commands.default_permissions()
     @app_commands.guilds(int(os.getenv(constants.TEST_SERVER_ENV)))
-    async def sync(self, ctx: commands.Context, which: str = commands.parameter(default="*", converter=Literal["*", "test", "~"])):
-        test_guild = await commands.GuildConverter().convert(ctx, os.getenv(constants.TEST_SERVER_ENV))
+    async def sync(self, ctx: commands.Context,
+        which: str = commands.parameter(default="*", converter=Literal["*", "test", "~"])):
+
+        test_guild = await commands.GuildConverter().convert(
+            ctx, os.getenv(constants.TEST_SERVER_ENV))
 
         if which == "*":
             #  Sync everything
@@ -162,7 +181,9 @@ class Admin(commands.Cog):
             synced = await ctx.bot.tree.sync(guild=test_guild)
 
         synced_names = [command.name for command in synced]
-        await ctx.send(f"Synced {len(synced)} commands to the command tree {constants.DEFAULT_EMOTE}.\nCommands: {synced_names}", ephemeral=True)
+        await ctx.send(
+            f"Synced {len(synced)} commands to the command tree {constants.DEFAULT_EMOTE}.\nCommands: {synced_names}",
+            ephemeral=True)
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(Admin(bot))

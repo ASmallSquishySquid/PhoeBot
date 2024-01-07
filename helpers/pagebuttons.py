@@ -1,6 +1,6 @@
-import discord
-
 from typing import Callable
+
+import discord
 
 class PageButtons(discord.ui.View):
     def __init__(self, total: int, embeds: dict, embed_builder: Callable[[int, int], discord.Embed], count: int = 1):
@@ -19,7 +19,7 @@ class PageButtons(discord.ui.View):
 
         await self.message.edit(view=self)
 
-    def get_embed(self):
+    def __get_embed(self):
         if not self.index in self.embeds:
             embed = self.embed_builder(self.index, self.total)
 
@@ -37,28 +37,32 @@ class PageButtons(discord.ui.View):
         if self.index == 0:
             button.disabled = True
 
-        embed_message = self.get_embed()
+        embed_message = self.__get_embed()
 
         await self.message.edit(embed=embed_message, view=self)
         await interaction.response.defer()
 
     def __add_buttons(self):
-        next = discord.ui.Button(style=discord.ButtonStyle.green, emoji="➡️", custom_id="next", disabled=(self.total == 1))
+        next_button = discord.ui.Button(
+            style=discord.ButtonStyle.green,
+            emoji="➡️",
+            custom_id="next",
+            disabled=(self.total == 1))
 
-        async def next_button(interaction: discord.Interaction):
+        async def next_button_action(interaction: discord.Interaction):
             self.index += 1
 
             for child in self.children:
                 child.disabled = False
 
             if self.count * (self.index + 1) >= self.total:
-                next.disabled = True
+                next_button.disabled = True
 
-            embed_message = self.get_embed()
+            embed_message = self.__get_embed()
 
             await self.message.edit(embed=embed_message, view=self)
             await interaction.response.defer()
 
-        next.callback = next_button
+        next_button.callback = next_button_action
 
-        self.add_item(next)
+        self.add_item(next_button)

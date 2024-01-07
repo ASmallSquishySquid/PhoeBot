@@ -1,11 +1,11 @@
-import aiohttp
 import datetime
-import discord
 import os
 
+import aiohttp
+import discord
 from discord.ext import commands
 
-import helpers.constants as constants
+from helpers import constants
 
 class TextCommands(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -16,7 +16,8 @@ class TextCommands(commands.Cog):
         brief="Current date/time"
     )
     async def date(self, ctx: commands.Context):
-        await ctx.send(f"Today is {str(datetime.date.today().strftime('%m/%d/%Y'))} {constants.DEFAULT_EMOTE}")
+        await ctx.send(
+            f"Today is {str(datetime.date.today().strftime('%m/%d/%Y'))} {constants.DEFAULT_EMOTE}")
 
     @commands.hybrid_command(
         help="Hehehe boop",
@@ -35,7 +36,8 @@ class TextCommands(commands.Cog):
         hidden=True
     )
     async def catfact(self, ctx: commands.Context):
-       await ctx.send("This command has been depricated. Please use !fact cat instead <:mmMilkSorry:764772302289109003>")
+        await ctx.send(
+            "This command has been depricated. Please use !fact cat instead <:mmMilkSorry:764772302289109003>")
 
     @commands.hybrid_command(
         help="Gets the link to your currently playing song on Spotify",
@@ -49,7 +51,8 @@ class TextCommands(commands.Cog):
             if isinstance(activity, discord.Spotify):
                 await ctx.send("https://open.spotify.com/track/" + activity.track_id)
                 return
-        await ctx.send(f"You are not currently listening to anything on Spotify {constants.DEFAULT_EMOTE}")
+        await ctx.send(
+            f"You are not currently listening to anything on Spotify {constants.DEFAULT_EMOTE}")
 
     @commands.hybrid_command(
         help="Get the sauce",
@@ -57,7 +60,7 @@ class TextCommands(commands.Cog):
     )
     async def sauce(self, ctx: commands.Context):
         await ctx.send("https://github.com/ASmallSquishySquid/PhoeBot")
-    
+
     @commands.hybrid_group(
         help="Get a random fact",
         fallback="random"
@@ -92,7 +95,7 @@ class TextCommands(commands.Cog):
                 if response.status == 200:
                     js = await response.json()
                     await ctx.send(f"{js['facts'][0]} 🐶")
-      
+
     @fact.command(
         help="Get a random number fact",
         brief="Number fact"

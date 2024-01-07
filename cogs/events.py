@@ -1,10 +1,10 @@
-import discord
+from datetime import datetime
 import os
 
-from datetime import datetime
+import discord
 from discord.ext import commands
 
-import helpers.constants as constants
+from helpers import constants
 from helpers.authorizedusers import AuthorizedUsers
 
 class Events(commands.Cog):
@@ -19,12 +19,12 @@ class Events(commands.Cog):
         if not AuthorizedUsers.is_authorized(message.author.id):
             return
 
-        elif message.content.lower().startswith("hi") or message.content.lower().startswith("hello") :
+        if message.content.lower().startswith("hi") or message.content.lower().startswith("hello") :
             await message.reply(f"Hello! {constants.DEFAULT_EMOTE}", mention_author=True)
 
     @commands.Cog.listener()
     async def on_presence_update(self, before: discord.Member, after: discord.Member):
-        if (before.id != self.bot.owner_id):
+        if before.id != self.bot.owner_id:
             return
 
         # Did I start/stop developing the bot?
@@ -35,7 +35,9 @@ class Events(commands.Cog):
             await self.bot.change_presence(activity=constants.DEFAULT_ACTIVITY)
 
         if (not is_editing_before and is_editing_after):
-            await self.bot.change_presence(activity=discord.CustomActivity(name="Under construction 🛠️"), status=discord.Status.dnd)
+            await self.bot.change_presence(
+                activity=discord.CustomActivity(name="Under construction 🛠️"),
+                status=discord.Status.dnd)
 
         # Ask to play OW or Val if I started playing
         if datetime.now() < datetime.now().replace(hour=19, minute=0) and datetime.now() > datetime.now().replace(hour=7, minute=0):

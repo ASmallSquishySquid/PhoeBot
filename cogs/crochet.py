@@ -1,12 +1,12 @@
-import aiohttp
-import discord
 import os
-
-from discord import app_commands
-from discord.ext import commands
-from helpers.pagebuttons import PageButtons
 from typing import Optional
 
+import aiohttp
+import discord
+from discord import app_commands
+from discord.ext import commands
+
+from helpers.pagebuttons import PageButtons
 
 class Crochet(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -19,7 +19,12 @@ class Crochet(commands.Cog):
         free="Only show free patterns",
         search="The search query"
     )
-    async def pattern(self, ctx: commands.Context, free: Optional[bool] = commands.parameter(default=True, description="Only show free patterns"), *, search: str = commands.parameter(description="The search query")):
+    async def pattern(self, ctx: commands.Context,
+        free: Optional[bool] = commands.parameter(
+            default=True,
+            description="Only show free patterns"), *,
+        search: str = commands.parameter(description="The search query")):
+
         username = os.getenv("RAVELRY_USER")
         password = os.getenv("RAVELRY_PASS")
         free_filter = "&availability=free"
@@ -40,16 +45,24 @@ class Crochet(commands.Cog):
 
                         buttons.message = await ctx.send(embed=embed_message, view=buttons)
                     else:
-                        await ctx.send(f"There are no {'free ' if free else ''}patterns for '{search}'")
+                        await ctx.send(
+                            f"There are no {'free ' if free else ''}patterns for '{search}'")
 
     def build_pattern_embed(self, pattern_js: dict, index: int, total: int) -> discord.Embed:
-        embed_message = discord.Embed(title=pattern_js["name"], url=f"https://www.ravelry.com/patterns/library/{pattern_js['permalink']}", color=discord.Color.from_str("#EE6E62"))
+        embed_message = discord.Embed(
+            title=pattern_js["name"],
+            url=f"https://www.ravelry.com/patterns/library/{pattern_js['permalink']}",
+            color=discord.Color.from_str("#EE6E62"))
         embed_message.set_author(
-            name=pattern_js["designer"]["name"], 
-            url=f"https://www.ravelry.com/designers/{pattern_js['designer']['permalink']}", 
-            icon_url=(None if len(pattern_js["designer"]["users"]) == 0 else pattern_js["designer"]["users"][0]["photo_url"]))
+            name=pattern_js["designer"]["name"],
+            url=f"https://www.ravelry.com/designers/{pattern_js['designer']['permalink']}",
+            icon_url=
+                None if len(pattern_js["designer"]["users"]) == 0
+                else pattern_js["designer"]["users"][0]["photo_url"])
         embed_message.set_image(url=pattern_js["first_photo"]["medium_url"])
-        embed_message.set_footer(text=f"Result {index + 1} of {total}", icon_url="https://cdn.discordapp.com/attachments/1186231213216768060/1191222619454836806/RavelrySecondaryLogo2020-Color.png")
+        embed_message.set_footer(
+            text=f"Result {index + 1} of {total}",
+            icon_url="https://cdn.discordapp.com/attachments/1186231213216768060/1191222619454836806/RavelrySecondaryLogo2020-Color.png")
 
         return embed_message
 

@@ -60,15 +60,21 @@ class Reminders(commands.Cog):
         help="Get your future reminders",
         fallback="get"
     )
+    @app_commands.rename(
+        show_id="ids"
+    )
     @app_commands.describe(
         count="Number of reminders per page",
-        show_id="Whether to show the reminder ID"
+        show_id="Whether to show the reminder IDs"
     )
     async def reminders(self, ctx: commands.Context,
         count: Optional[int] =
             commands.parameter(default=10, description="Number of reminders per page"),
         show_id: bool =
-            commands.parameter(default=False, description="Whether to show the reminder ID")):
+            commands.parameter(
+                displayed_name="ids",
+                default=False,
+                description="Whether to show the reminder IDs")):
 
         now = datetime.datetime.now()
         total = Database.count(
@@ -206,7 +212,7 @@ class Reminders(commands.Cog):
     @set.error
     async def remind_error(self, ctx, error):
         if isinstance(error, commands.errors.MissingRequiredArgument):
-            await ctx.send(f'The remind command takes in a reminder string and a time. ex: !remind "Send email" 12:00 {constants.DEFAULT_EMOTE}')
+            await ctx.send(f'The remind command takes in a reminder string and a time. ex: !reminders set "Send email" 12:00 {constants.DEFAULT_EMOTE}')
         else:
             await ctx.send(f'Please keep the reminder in one string and keep all time components separate. And no AM/PM! {constants.DEFAULT_EMOTE}')
 
@@ -226,7 +232,9 @@ class Reminders(commands.Cog):
         reminder_id="The ID of the reminder being deleted"
     )
     async def delete(self, ctx: commands.Context,
-        reminder_id: int = commands.parameter(description="The ID of the reminder being deleted")):
+        reminder_id: int = commands.parameter(
+            displayed_name="reminder ID",
+            description="The ID of the reminder being deleted")):
 
         reminders = Database.select(
             "*", "reminders",

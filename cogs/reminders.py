@@ -189,21 +189,13 @@ class Reminders(commands.Cog):
         ]
 
         days = {
-            "tomorrow": 
-                datetime.datetime.now().replace(hour=10, minute=0) +
-                datetime.timedelta(days=1),
-            "tonight":
-                datetime.datetime.now().replace(hour=20, minute=0) +
-                datetime.timedelta(days=(1 if (datetime.datetime.now().hour >= 20) else 0)),
-            "midnight":
-                datetime.datetime.now().replace(hour=0, minute=0) +
-                datetime.timedelta(days=1),
-            "noon":
-                datetime.datetime.now().replace(hour=12, minute=0) +
-                datetime.timedelta(days=(1 if (datetime.datetime.now().hour >= 12) else 0))
+            "tomorrow": "1d 10:00",
+            "tonight": "0d 20:00",
+            "midnight": "0:00",
+            "noon": "12:00"
         }
         matched_times.extend([
-            app_commands.Choice(name=day, value=time.strftime("%x %X"))
+            app_commands.Choice(name=day, value=time)
             for day, time in days.items() if current.lower() in day.lower()
         ])
 

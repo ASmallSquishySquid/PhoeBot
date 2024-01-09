@@ -108,16 +108,13 @@ class DropdownView(discord.ui.View):
         options=[
             discord.SelectOption(
                 label="Tomorrow", description="Tomorrow morning at 10 AM", emoji="🌄",
-                value=(datetime.datetime.now().replace(hour=10, minute=0) +
-                    datetime.timedelta(days=1)).strftime("%x %X")),
+                value="1d 10:00"),
             discord.SelectOption(
                 label="Tonight", description="Tonight at 8 PM", emoji="🌒",
-                value=(datetime.datetime.now().replace(hour=20, minute=0) +
-                    datetime.timedelta(days=(1 if (datetime.datetime.now().hour >= 20) else 0)))
-                    .strftime("%x %X")),
+                value="0d 20:00"),
             discord.SelectOption(
                 label="In one hour", description="One hour from now", emoji="🕐",
-                value=(datetime.datetime.now() + datetime.timedelta(hours=1)).strftime("%x %X"))
+                value="1h")
         ]
     )
     async def select_time(self, interaction: discord.Interaction, select: discord.ui.Select):

@@ -83,24 +83,21 @@ class Loops(commands.Cog):
                     embed_message = discord.Embed(
                         title=js["title"],
                         description=js["explanation"],
-                        url=js["url"],
+                        url=js["hdurl"] if "hdurl" in js else js["url"],
                         color=discord.Color.og_blurple())
                     embed_message.set_author(
                         name="NASA",
-                        url="https://apod.nasa.gov/apod/astropix.html",
+                        url=f"https://apod.nasa.gov/apod/ap{''.join(date[-2:] for date in js['date'].split('-'))}.html",
                         icon_url="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/NASA_logo.svg/110px-NASA_logo.svg.png")
 
                     if js["media_type"] == "image":
                         embed_message.set_image(url=js["url"])
                     elif js["media_type"] == "video":
-                        if "thumbnail_url" in js:
-                            embed_message.set_image(url=js["thumbnail_url"])
-                        else:
-                            video_id = "mPcoBfQ5j-k"
-                            if "youtu" in js["url"]:
-                                video_id = js["url"].split("/")[-1].split("?")[0]
-                            embed_message.set_image(
-                                url=f"https://img.youtube.com/vi/{video_id}/maxresdefault.jpg")
+                        video_id = "mPcoBfQ5j-k"
+                        if "youtu" in js["url"]:
+                            video_id = js["url"].split("/")[-1].split("?")[0]
+                        embed_message.set_image(
+                            url=f"https://img.youtube.com/vi/{video_id}/maxresdefault.jpg")
 
                     user_id = int(os.getenv("SQIDJI_ID"))
                     sqidji = self.bot.get_user(user_id)

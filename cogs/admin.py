@@ -146,12 +146,15 @@ class Admin(commands.Cog):
     @commands.is_owner()
     @app_commands.default_permissions()
     async def invite(self, ctx: commands.Context):
-        client_id = os.getenv('CLIENT_ID')
+        invite_url = discord.utils.oauth_url(
+            client_id=os.getenv('CLIENT_ID'),
+            permissions=discord.Permissions(permissions=379904))
+
         if ctx.guild:
-            await ctx.author.send(f"https://discord.com/api/oauth2/authorize?client_id={client_id}&permissions=379904&scope=bot")
+            await ctx.author.send(invite_url)
             await ctx.send("Sent the invite link in DMs", ephemeral=True)
         else:
-            await ctx.send(f"https://discord.com/api/oauth2/authorize?client_id={client_id}&permissions=379904&scope=bot")
+            await ctx.send(invite_url)
 
     @commands.hybrid_command(
         help="Syncs the slash command tree"

@@ -19,7 +19,9 @@ class Events(commands.Cog):
         if not AuthorizedUsers.is_authorized(message.author.id):
             return
 
-        if message.content.lower().startswith("hi") or message.content.lower().startswith("hello") :
+        stripped_message = discord.utils.remove_markdown(message.content).lower()
+
+        if stripped_message.startswith("hi") or stripped_message.startswith("hello") :
             await message.reply(f"Hello! {constants.DEFAULT_EMOTE}", mention_author=True)
 
     @commands.Cog.listener()

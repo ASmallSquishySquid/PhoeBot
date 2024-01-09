@@ -17,7 +17,7 @@ class TextCommands(commands.Cog):
     )
     async def date(self, ctx: commands.Context):
         await ctx.send(
-            f"Today is {str(datetime.date.today().strftime('%m/%d/%Y'))} {constants.DEFAULT_EMOTE}")
+            f"Today is {discord.utils.format_dt(datetime.datetime.today(), style='d')} {constants.DEFAULT_EMOTE}")
 
     @commands.hybrid_command(
         help="Hehehe boop",

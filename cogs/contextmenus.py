@@ -1,3 +1,4 @@
+import datetime
 import os
 
 import discord
@@ -11,15 +12,20 @@ class ContextMenus(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.authorize_ctx_menu = app_commands.ContextMenu(
-            name='Authorize',
+            name="Authorize",
             callback=self.authorize_context_menu,
         )
         self.unauthorize_ctx_menu = app_commands.ContextMenu(
-            name='Unauthorize',
+            name="Unauthorize",
             callback=self.unauthorize_context_menu,
+        )
+        self.reminder_ctx_menu = app_commands.ContextMenu(
+            name="Remind me",
+            callback=self.reminder_context_menu,
         )
         self.bot.tree.add_command(self.authorize_ctx_menu)
         self.bot.tree.add_command(self.unauthorize_ctx_menu)
+        self.bot.tree.add_command(self.reminder_ctx_menu)
 
     async def cog_unload(self) -> None:
         self.bot.tree.remove_command(
@@ -28,8 +34,10 @@ class ContextMenus(commands.Cog):
         self.bot.tree.remove_command(
             self.unauthorize_ctx_menu.name,
             type=self.unauthorize_ctx_menu.type)
+        self.bot.tree.remove_command(
+            self.reminder_ctx_menu.name,
+            type=self.reminder_ctx_menu.type)
 
-    @staticmethod
     def is_owner(interaction: discord.Interaction) -> bool:
         return interaction.user.id == int(os.getenv(constants.OWNER_ENV))
 
@@ -62,6 +70,65 @@ class ContextMenus(commands.Cog):
 
         await interaction.response.send_message(
             f"User {member.mention} is dead to me {constants.DEFAULT_EMOTE}")
+
+    async def reminder_context_menu(self,
+        interaction: discord.Interaction, message: discord.Message) -> None:
+
+        context = await self.bot.get_context(interaction)
+        set_reminder_command = self.bot.get_command("reminders set")
+
+        view = DropdownView(message.jump_url, context, set_reminder_command)
+
+        await interaction.response.send_message(
+            "When would you like me to remind you?",
+            view=view,
+            ephemeral=True)
+
+        view.message = await interaction.original_response()
+
+class DropdownView(discord.ui.View):
+    def __init__(self, message_url: str,
+        ctx: commands.Context, reminder_command: commands.Command):
+
+        self.message_url = message_url
+        self.ctx = ctx
+        self.reminder_command = reminder_command
+        self.message = None
+        super().__init__(timeout=60)
+
+    async def on_timeout(self):
+        for child in self.children:
+            child.disabled = True
+
+        await self.message.edit(view=self)
+
+    @discord.ui.select(
+        cls=discord.ui.Select,
+        placeholder="Please select a time",
+        options=[
+            discord.SelectOption(
+                label="Tomorrow", description="Tomorrow morning at 10 AM", emoji="🌄",
+                value=(datetime.datetime.now().replace(hour=10, minute=0) +
+                    datetime.timedelta(days=1)).strftime("%x %X")),
+            discord.SelectOption(
+                label="Tonight", description="Tonight at 8 PM", emoji="🌒",
+                value=(datetime.datetime.now().replace(hour=20, minute=0) +
+                    datetime.timedelta(days=(1 if (datetime.datetime.now().hour >= 20) else 0)))
+                    .strftime("%x %X")),
+            discord.SelectOption(
+                label="In one hour", description="One hour from now", emoji="🕐",
+                value=(datetime.datetime.now() + datetime.timedelta(hours=1)).strftime("%x %X"))
+        ]
+    )
+    async def select_time(self, interaction: discord.Interaction, select: discord.ui.Select):
+        select.disabled =  True
+
+        await self.ctx.invoke(
+            self.reminder_command,
+            reminder=self.message_url,
+            when=select.values[0])
+
+        await interaction.response.edit_message(view=self)
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(ContextMenus(bot))

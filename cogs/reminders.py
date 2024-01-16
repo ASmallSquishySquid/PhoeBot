@@ -5,6 +5,7 @@ from typing import List, Optional
 import asyncio
 import discord
 from discord import app_commands
+from discord.app_commands import locale_str as _T
 from discord.ext import commands
 from discord.ext import tasks
 
@@ -57,15 +58,16 @@ class Reminders(commands.Cog):
             self.reminder_cache = later
 
     @commands.hybrid_group(
+        description=_T("reminders"),
         help="Get your future reminders",
         fallback="get"
     )
     @app_commands.rename(
-        show_id="ids"
+        show_id=_T("ids")
     )
     @app_commands.describe(
-        count="Number of reminders per page",
-        show_id="Whether to show the reminder IDs"
+        count=_T("reminders-count"),
+        show_id=_T("reminders-ids")
     )
     async def reminders(self, ctx: commands.Context,
         count: Optional[int] =
@@ -98,11 +100,12 @@ class Reminders(commands.Cog):
         buttons.message = await ctx.send(embed=embed_message, view=buttons)
 
     @reminders.command(
+        description=_T("set"),
         help="Set a reminder"
     )
     @app_commands.describe(
-        reminder="What do you want to be reminded of?",
-        when="When do you want to be reminded?"
+        reminder=_T("set-reminder"),
+        when=_T("set-when")
     )
     async def set(self, ctx: commands.Context,
         reminder: str = commands.parameter(description="What do you want to be reminded of?"), *,
@@ -209,6 +212,7 @@ class Reminders(commands.Cog):
             await ctx.send(f'Please keep the reminder in one string and keep all time components separate. And no AM/PM! {constants.DEFAULT_EMOTE}')
 
     @reminders.command(
+        description=_T("debug"),
         help="Get the contents of the internal reminder list"
     )
     @commands.is_owner()
@@ -218,10 +222,11 @@ class Reminders(commands.Cog):
         await ctx.send(self.reminder_cache)
 
     @reminders.command(
+        description=_T("delete"),
         help="Delete a reminder"
     )
     @app_commands.describe(
-        reminder_id="The ID of the reminder being deleted"
+        reminder_id=_T("delete-reminder_id")
     )
     async def delete(self, ctx: commands.Context,
         reminder_id: int = commands.parameter(

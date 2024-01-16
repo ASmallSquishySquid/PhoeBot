@@ -9,6 +9,7 @@ from discord.ext.commands import Bot
 
 from helpers import constants
 from helpers.authorizedusers import AuthorizedUsers
+from helpers.translator import CommandTranslator
 
 sys.stdout = open(
     file=f"../phoebot_logs/{datetime.now().strftime('%m:%d:%Y-%H:%M')}.log",
@@ -35,6 +36,7 @@ async def on_ready():
         f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] We have logged in as {bot.user}",
         flush=True)
     AuthorizedUsers.startup()
+    await bot.tree.set_translator(CommandTranslator())
     for cog in constants.COGS:
         await bot.load_extension("cogs." + cog)
 

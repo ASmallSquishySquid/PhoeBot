@@ -6,6 +6,7 @@ from typing import List, Literal
 
 import discord
 from discord import app_commands
+from discord.app_commands import locale_str as _T
 from discord.ext import commands
 
 from helpers import constants
@@ -18,12 +19,13 @@ class Admin(commands.Cog):
     # Authorization commands
 
     @commands.hybrid_command(
+        description=_T("authorize"),
         help="Authorize a user"
     )
     @commands.is_owner()
     @commands.guild_only()
     @app_commands.describe(
-        user="The user being authorized"
+        user=_T("authorize-user")
     )
     @app_commands.default_permissions()
     async def authorize(self, ctx: commands.Context,
@@ -36,12 +38,13 @@ class Admin(commands.Cog):
         await ctx.send(f"User {user.mention} is no longer a stranger {constants.DEFAULT_EMOTE}")
 
     @commands.hybrid_command(
+        description=_T("unauthorize"),
         help="Remove authorization from a user"
     )
     @commands.is_owner()
     @commands.guild_only()
     @app_commands.describe(
-        user="The user to remove authorization from"
+        user=_T("unauthorize-user")
     )
     @app_commands.default_permissions()
     async def unauthorize(self, ctx: commands.Context,
@@ -59,6 +62,7 @@ class Admin(commands.Cog):
         await ctx.send(f"User {user.mention} is dead to me {constants.DEFAULT_EMOTE}")
 
     @commands.hybrid_command(
+        description=_T("users"),
         help="Get the list of authorized user IDs"
     )
     @commands.is_owner()
@@ -71,11 +75,12 @@ class Admin(commands.Cog):
 
     @commands.hybrid_command(
         name="load",
+        description=_T("load"),
         help="Loads a cog"
     )
     @commands.is_owner()
     @app_commands.describe(
-        cog_name="The name of the extension to load"
+        cog_name=_T("load-cog_name")
     )
     @app_commands.default_permissions()
     @app_commands.guilds(int(os.getenv(constants.TEST_SERVER_ENV)))
@@ -89,11 +94,12 @@ class Admin(commands.Cog):
 
     @commands.hybrid_command(
         name="reload",
+        description=_T("reload"),
         help="Reloads a cog"
     )
     @commands.is_owner()
     @app_commands.describe(
-        cog_name="The name of the extension to reload"
+        cog_name=_T("reload-cog_name")
     )
     @app_commands.default_permissions()
     @app_commands.guilds(int(os.getenv(constants.TEST_SERVER_ENV)))
@@ -141,6 +147,7 @@ class Admin(commands.Cog):
     # Miscellaneous commands
 
     @commands.hybrid_command(
+        description=_T("invite"),
         help="Add the bot to your server"
     )
     @commands.is_owner()
@@ -157,11 +164,12 @@ class Admin(commands.Cog):
             await ctx.send(invite_url)
 
     @commands.hybrid_command(
+        description=_T("sync"),
         help="Syncs the slash command tree"
     )
     @commands.is_owner()
     @app_commands.describe(
-        which="Which tree do you want to sync?"
+        which=_T("sync-which")
     )
     @app_commands.default_permissions()
     @app_commands.guilds(int(os.getenv(constants.TEST_SERVER_ENV)))

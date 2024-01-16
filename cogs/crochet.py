@@ -4,6 +4,7 @@ from typing import Optional
 import aiohttp
 import discord
 from discord import app_commands
+from discord.app_commands import locale_str as _T
 from discord.ext import commands
 
 from helpers.pagebuttons import PageButtons
@@ -13,11 +14,12 @@ class Crochet(commands.Cog):
         self.bot = bot
 
     @commands.hybrid_command(
+        description=_T("pattern"),
         help="Get some crochet patterns"
     )
     @app_commands.describe(
-        free="Only show free patterns",
-        search="The search query"
+        free=_T("pattern-free"),
+        search=_T("pattern-search")
     )
     async def pattern(self, ctx: commands.Context,
         free: Optional[bool] = commands.parameter(

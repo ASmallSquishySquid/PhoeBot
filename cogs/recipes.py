@@ -4,6 +4,7 @@ from typing import List
 import aiohttp
 import discord
 from discord import app_commands
+from discord.app_commands import locale_str as _T
 from discord.ext import commands
 
 from helpers.pagebuttons import PageButtons
@@ -13,11 +14,12 @@ class Recipes(commands.Cog):
         self.bot = bot
 
     @commands.hybrid_command(
+        description=_T("recipe"),
         help="Get some recipes",
         aliases=["recipes", "dinner"]
     )
     @app_commands.describe(
-        search="The search query"
+        search=_T("recipe-search")
     )
     async def recipe(self, ctx: commands.Context, *,
         search: str = commands.parameter(default="dinner", description="The search query")):

@@ -1,6 +1,8 @@
 import os
 import sqlite3
 
+from helpers import constants
+
 class Database():
     connection = None
 
@@ -111,7 +113,7 @@ class Database():
     def connect(cls) -> None:
         """Connect to the phoebot database"""
         package_dir = os.path.abspath(os.path.dirname(__file__))
-        database_path = os.path.join(package_dir, "..", "..", "phoebot.db")
+        database_path = os.path.join(package_dir, "..", "..", constants.RESOURCE_FOLDER, "phoebot.db")
         cls.connection = sqlite3.connect(
             database=database_path,
             detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)

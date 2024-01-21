@@ -70,6 +70,15 @@ arg-desc-set-when = When do you want to be reminded?
 arg-desc-delete-reminder_id = The ID of the reminder being deleted
 
 
+# Tasks
+cmd-tasks = tasks
+desc-tasks = Get your tasks
+
+arg-task_list = task_list
+
+arg-desc-tasks-task_list = The task list
+
+
 ## Text commands
 cmd-date = date
 desc-date = Get the current date and time

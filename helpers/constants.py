@@ -1,7 +1,7 @@
 import discord
 
 COGS = {"admin", "contextmenus", "crochet", "events",
-        "loops", "recipes", "reminders", "textcommands"}
+        "loops", "recipes", "reminders", "tasks", "textcommands"}
 DEFAULT_ACTIVITY = discord.Activity(type=discord.ActivityType.watching, name="you 👀")
 DEFAULT_EMOTE = "<:charmanderawr:837344550804127774>"
 DEFAULT_LOCALE = discord.Locale.american_english

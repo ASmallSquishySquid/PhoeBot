@@ -1,3 +1,4 @@
+![Latest release](https://img.shields.io/github/v/release/ASmallSquishySquid/PhoeBot)
 [![If you're reading this, Jenkins is currently offline](https://starling-legal-snapper.ngrok-free.app/buildStatus/icon?job=PhoeBot)](https://starling-legal-snapper.ngrok-free.app/job/PhoeBot/)
 [![Pylint status](https://github.com/ASmallSquishySquid/PhoeBot/actions/workflows/pylint.yml/badge.svg)](https://github.com/ASmallSquishySquid/PhoeBot/actions)
 # PhoeBot

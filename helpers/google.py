@@ -18,7 +18,7 @@ class Calendar():
 @dataclass
 class Event():
     id: str
-    start: str
+    start: datetime.datetime
     summary: str
     reminders: List[int] = None
 
@@ -31,8 +31,9 @@ class TaskList():
 class Task():
     id: str
     title: str
+    position: int
     parent: str = None
-    due: str = None
+    due: datetime.datetime = None
 
 class Google():
     credentials = None
@@ -99,7 +100,7 @@ class Google():
         results = service.tasks().list(tasklist=list_id, showCompleted=False).execute()
         items = results.get("items", [])
 
-        return [Task(item["id"], item["title"], item.get("parent"), item.get("due"))
+        return [Task(item["id"], item["title"], int(item["position"]), item.get("parent"), cls.rfc_to_datetime(item.get("due")))
             for item in items]
 
     @classmethod
@@ -151,4 +152,50 @@ class Google():
             ).execute()
         items = events_result.get("items", [])
 
-        return [Event(item["id"], item["start"], item["summary"]) for item in items]
+        return [Event(item["id"], cls.parse_start(item["start"]), item["summary"])
+            for item in items]
+
+    @staticmethod
+    def parse_start(start: dict) -> datetime.datetime:
+        """Helper to parse the start dictionary of an Event.
+
+        Args:
+            start (dict): The start dictionary
+
+        Returns:
+            datetime.datetime: The start datetime
+        """
+        if "date" in start:
+            return Google.date_to_datetime(start["date"])
+
+        return Google.rfc_to_datetime(start["dateTime"])
+
+    @staticmethod
+    def rfc_to_datetime(rfc: str) -> datetime.datetime:
+        """Converts a RFC 3339 timestamp to a datetime object.
+
+        Args:
+            rfc (str): The RFC 3339 timestamp 
+
+        Returns:
+            datetime.datetime: The equivalent datetime
+        """
+        if not rfc:
+            return None
+
+        try:
+            return datetime.datetime.strptime(rfc[:19], "%Y-%m-%dT%H:%M:%S")
+        except ValueError:
+            return None
+
+    @staticmethod
+    def date_to_datetime(date: str) -> datetime.datetime:
+        """Converts a date to a datetime object.
+
+        Args:
+            date (str): The date
+
+        Returns:
+            datetime.datetime: The equivalent datetime
+        """
+        return datetime.datetime.strptime(date, "%Y-%m-%d")

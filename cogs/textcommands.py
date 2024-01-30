@@ -51,7 +51,12 @@ class TextCommands(commands.Cog):
     @commands.guild_only()
     async def np(self, ctx: commands.Context):
         # Only works when sent in a server
-        for activity in ctx.author.activities:
+        activities = ctx.author.activities
+        if len(activities) == 0:
+            member = ctx.guild.get_member(ctx.author.id)
+            if member:
+                activities = member.activities
+        for activity in activities:
             if isinstance(activity, discord.Spotify):
                 await ctx.send("https://open.spotify.com/track/" + activity.track_id)
                 return

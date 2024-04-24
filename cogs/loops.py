@@ -139,33 +139,33 @@ class Loops(commands.Cog):
                                 (response_feed.entries[i].title, response_feed.entries[i].link)
                                 for i in indices]
 
-                            embed_message = discord.Embed(
-                                title="Your daily good news <:cutesmile:772176440330027038>",
-                                color=discord.Color.og_blurple(),
-                                timestamp=datetime.datetime.now())
-                            embed_message.set_author(
-                                name="Good News Network",
-                                url="https://www.goodnewsnetwork.org/",
-                                icon_url="https://www.goodnewsnetwork.org/wp-content/uploads/2021/01/cropped-GNN-Logo-Circles-2017-1-32x32.png"
-                            )
-                            for section, selected_stories in stories.items():
-                                formatted = "\n\n".join(
-                                    [f"[{story[0]}]({story[1]})" for story in selected_stories])
-                                embed_message.add_field(
-                                    name=f"__{section}__", value=formatted, inline=False)
-
-                            user_id = int(os.getenv("SQIDJI_ID"))
-                            sqidji = self.bot.get_user(user_id)
-                            if sqidji is None:
-                                sqidji = await self.bot.fetch_user(user_id)
-
-                            await sqidji.send(embed=embed_message)
-
                         else:
                             print(
-                                f"Error getting daily good news: {response.status}",
+                                f"Error getting daily good news in {feed} category: {response.status}",
                                 file=sys.stderr)
                             sys.stderr.flush()
+
+            embed_message = discord.Embed(
+                title="Your daily good news <:cutesmile:772176440330027038>",
+                color=discord.Color.og_blurple(),
+                timestamp=datetime.datetime.now())
+            embed_message.set_author(
+                name="Good News Network",
+                url="https://www.goodnewsnetwork.org/",
+                icon_url="https://www.goodnewsnetwork.org/wp-content/uploads/2021/01/cropped-GNN-Logo-Circles-2017-1-32x32.png"
+            )
+            for section, selected_stories in stories.items():
+                formatted = "\n\n".join(
+                    [f"[{story[0]}]({story[1]})" for story in selected_stories])
+                embed_message.add_field(
+                    name=f"__{section}__", value=formatted, inline=False)
+
+            user_id = int(os.getenv("SQIDJI_ID"))
+            sqidji = self.bot.get_user(user_id)
+            if sqidji is None:
+                sqidji = await self.bot.fetch_user(user_id)
+
+            await sqidji.send(embed=embed_message)
 
         except (aiohttp.ClientError, IndexError, discord.HTTPException, discord.NotFound) as error:
             print(

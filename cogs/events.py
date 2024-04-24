@@ -49,12 +49,12 @@ class Events(commands.Cog):
                 channel = await self.bot.fetch_channel(channel_id)
 
             old_playing = [game.name for game in before.activities if str(game.type) == "ActivityType.playing"]
-            new_playing = [game.name for game in after.activities if str(game.type) == "ActivityType.playing" and game.name not in old_playing]
+            new_playing = [game.name.lower() for game in after.activities if str(game.type) == "ActivityType.playing" and game.name not in old_playing]
 
-            if "Overwatch 2" in new_playing:
+            if "overwatch 2" in new_playing:
                 await channel.send(f"<@{os.getenv('BLIST_ID')}> want to do some watching over?")
 
-            if "Valorant" in new_playing:
+            if "valorant" in new_playing:
                 await channel.send(f"<@{os.getenv('BLIST_ID')}> Val?")
 
 async def setup(bot: commands.Bot):
